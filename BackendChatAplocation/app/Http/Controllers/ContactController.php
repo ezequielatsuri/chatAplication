@@ -5,6 +5,7 @@ namespace App\Http\Controllers;
 use App\Models\Contact;
 use App\Models\User;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\Auth;
 
 class ContactController extends Controller
 {
@@ -13,7 +14,17 @@ class ContactController extends Controller
      */
     public function index()
     {
-        $contacts = Contact::all();
+        $user = Auth::user();
+        $contacts = Contact::where('user_id', $user->id)->with('contact')->get();
+
+        $contacts = $contacts->map(function ($contact) {
+            return [
+                'id' => $contact->id,
+                'name' => $contact->contact->name,
+                'email' => $contact->contact->email,
+            ];
+        });
+
         return response()->json($contacts);
     }
 
@@ -22,18 +33,13 @@ class ContactController extends Controller
      */
     public function store(Request $request)
     {
-        // Validar el email del nuevo contacto
         $request->validate([
             'email' => 'required|email|exists:users,email',
         ]);
 
-        // Obtener el usuario autenticado
-        $user = auth()->user();
-
-        // Buscar el usuario con el email proporcionado
+        $user = Auth::user();
         $contactUser = User::where('email', $request->email)->first();
 
-        // Verificar si la relación de contacto ya existe
         $existingContact = Contact::where('user_id', $user->id)
                                   ->where('contact_id', $contactUser->id)
                                   ->first();
@@ -45,13 +51,11 @@ class ContactController extends Controller
             ], 409);
         }
 
-        // Crear la nueva relación de contacto
         $contact = Contact::create([
             'user_id' => $user->id,
             'contact_id' => $contactUser->id,
         ]);
 
-        // Devolver la respuesta con los detalles del contacto
         return response()->json([
             'id' => $contact->id,
             'name' => $contactUser->name,

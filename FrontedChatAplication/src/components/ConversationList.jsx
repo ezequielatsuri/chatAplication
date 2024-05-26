@@ -2,14 +2,8 @@ import React, { useState, useEffect } from 'react';
 import axios from 'axios';
 import './ConversationList.css';
 
-const initialConversations = [
-  { id: 1, name: 'Alice', email: 'alice@example.com' },
-  { id: 2, name: 'Bob', email: 'bob@example.com' },
-  // Puedes agregar más conversaciones aquí
-];
-
 const ConversationList = ({ selectConversation }) => {
-  const [conversations, setConversations] = useState(initialConversations);
+  const [conversations, setConversations] = useState([]);
   const [newContact, setNewContact] = useState('');
   const [profile, setProfile] = useState({ name: 'John Doe', email: 'john.doe@example.com' });
 
@@ -27,8 +21,20 @@ const ConversationList = ({ selectConversation }) => {
       });
   };
 
+  const getContacts = () => {
+    axios.get('/contacts')
+      .then((res) => {
+        console.log('Contacts fetched', res);
+        setConversations(res.data);
+      })
+      .catch((err) => {
+        console.error('Error fetching contacts:', err);
+      });
+  };
+
   useEffect(() => {
     getUser();
+    getContacts();
   }, []);
 
   const handleAddContact = (e) => {
