@@ -3,8 +3,8 @@ import axios from 'axios';
 import './ConversationList.css';
 
 const initialConversations = [
-  { id: 1, name: 'Alice' },
-  { id: 2, name: 'Bob' },
+  { id: 1, name: 'Alice', email: 'alice@example.com' },
+  { id: 2, name: 'Bob', email: 'bob@example.com' },
   // Puedes agregar más conversaciones aquí
 ];
 
@@ -34,11 +34,18 @@ const ConversationList = ({ selectConversation }) => {
   const handleAddContact = (e) => {
     e.preventDefault();
     if (newContact.trim()) {
-      setConversations([
-        ...conversations,
-        { id: conversations.length + 1, name: newContact }
-      ]);
-      setNewContact('');
+      axios.post('/contacts', { email: newContact })
+        .then(response => {
+          console.log('Contact added', response);
+          setConversations([
+            ...conversations,
+            { id: response.data.id, name: response.data.name, email: response.data.email }
+          ]);
+          setNewContact('');
+        })
+        .catch(error => {
+          console.error('Error adding contact:', error);
+        });
     }
   };
 
@@ -65,7 +72,7 @@ const ConversationList = ({ selectConversation }) => {
           type="text"
           value={newContact}
           onChange={(e) => setNewContact(e.target.value)}
-          placeholder="Add new contact"
+          placeholder="Add new contact (email)"
         />
         <button type="submit">Add</button>
       </form>
@@ -76,7 +83,8 @@ const ConversationList = ({ selectConversation }) => {
             onClick={() => handleSelectConversation(conversation)}
             className="conversation-item"
           >
-            {conversation.name}
+            <p><strong>Name:</strong> {conversation.name}</p>
+            <p><strong>Email:</strong> {conversation.email}</p>
           </div>
         ))}
       </div>

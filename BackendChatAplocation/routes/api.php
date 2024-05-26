@@ -1,5 +1,4 @@
 <?php
-
 use App\Http\Controllers\AuthController;
 use App\Http\Controllers\ContactController;
 use App\Http\Controllers\MediaController;
@@ -7,8 +6,6 @@ use App\Http\Controllers\MessageController;
 use App\Http\Controllers\UserController;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Route;
-
-
 
 /*
 |--------------------------------------------------------------------------
@@ -21,28 +18,22 @@ use Illuminate\Support\Facades\Route;
 |
 */
 
+// Rutas protegidas por autenticación
 Route::middleware('auth:sanctum')->group(function(){
     Route::get('/user', function (Request $request) {
         return $request->user();
     });
-    Route::apiResource('/users', UserController::class)->names('user');
-    //Route::apiResource('/notes',NoteController::class)->names('notes');
+    Route::apiResource('/users', UserController::class)->names('users');
+    Route::apiResource('/contacts', ContactController::class)->names('contacts');
+    Route::apiResource('/messages', MessageController::class)->names('messages');
+    Route::apiResource('/media', MediaController::class)->names('media');
 });
-Route::post('/login',[AuthController::class,'login']);
 
-Route::apiResource('contacts', ContactController::class);
-Route::apiResource('messages', MessageController::class);
-Route::apiResource('media', MediaController::class);
+// Rutas de autenticación pública
+Route::post('/login', [AuthController::class, 'login']);
+Route::post('/register', [AuthController::class, 'register']);  // Opcional, si tienes registro de usuarios
+Route::post('/logout', [AuthController::class, 'logout'])->middleware('auth:sanctum');  // Opcional, si tienes logout
 
-
-
-//Route::apiResource('user', UserController::class);
-/*
-Route::apiResource('/users',UserController::class)->names('users');
-
-Route::apiResource('/users',UserController::class)->names('users');
-Route::apiResource('/categories',CategoryController::class)->names('categories');
-Route::apiResource('/notes',NoteController::class)->names('notes');
-Route::apiResource('/images',ImageController::class)->names('images');
-*/
-
+// Rutas adicionales de autenticación
+Route::post('/forgot-password', [AuthController::class, 'forgotPassword']);  // Opcional, si tienes recuperación de contraseña
+Route::post('/reset-password', [AuthController::class, 'resetPassword']);    // Opcional, si tienes reinicio de contraseña

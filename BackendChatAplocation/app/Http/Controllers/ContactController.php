@@ -3,6 +3,7 @@
 namespace App\Http\Controllers;
 
 use App\Models\Contact;
+use App\Models\User;
 use Illuminate\Http\Request;
 
 class ContactController extends Controller
@@ -21,13 +22,41 @@ class ContactController extends Controller
      */
     public function store(Request $request)
     {
+        // Validar el email del nuevo contacto
         $request->validate([
-            'user_id' => 'required|exists:users,id',
-            'contact_id' => 'required|exists:users,id',
+            'email' => 'required|email|exists:users,email',
         ]);
 
-        $contact = Contact::create($request->all());
-        return response()->json($contact, 201);
+        // Obtener el usuario autenticado
+        $user = auth()->user();
+
+        // Buscar el usuario con el email proporcionado
+        $contactUser = User::where('email', $request->email)->first();
+
+        // Verificar si la relación de contacto ya existe
+        $existingContact = Contact::where('user_id', $user->id)
+                                  ->where('contact_id', $contactUser->id)
+                                  ->first();
+
+        if ($existingContact) {
+            return response()->json([
+                'message' => 'El contacto ya existe.',
+                'contact' => $existingContact
+            ], 409);
+        }
+
+        // Crear la nueva relación de contacto
+        $contact = Contact::create([
+            'user_id' => $user->id,
+            'contact_id' => $contactUser->id,
+        ]);
+
+        // Devolver la respuesta con los detalles del contacto
+        return response()->json([
+            'id' => $contact->id,
+            'name' => $contactUser->name,
+            'email' => $contactUser->email,
+        ], 201);
     }
 
     /**
