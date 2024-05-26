@@ -1,0 +1,221 @@
+
+body {
+    margin: 0;
+   /* font-family: 'Quicksand', sans-serif;*/
+    font-family: "Roboto Flex", sans-serif;
+  }
+.main1{
+  width: 100%;
+  height: 130vh;
+  background-color: #c8c8e2;
+  box-sizing: border-box;
+  padding: 80px 140px;
+
+}
+  .container {
+      width: 100%;
+      height: 100vh;
+      display: flex;
+      flex-direction: row;
+      align-items: center;
+      box-shadow: 0px 0px 30px rgba(0, 0, 0, 0.5); /* Agrega sombra alrededor del contenedor */
+  }
+
+  .left {
+      background-color:#e6e6f0;
+      width: 50%;
+      height: 100%; /* Solo para propósitos de demostración */
+      display: flex;
+      justify-content: center;
+      position: relative;
+      align-items:end;
+  }
+  .navbar-top img{
+      margin-bottom: 180px;
+      margin-left: 100px;
+      width: 200px;
+      height: 200px;
+  }
+
+  .navbar-button ul{
+      list-style: none;
+      padding: 0;
+      margin: 0;
+      display: flex;
+      align-items: center;
+      height: 60px;
+  }
+  .navbar-button{
+      display: flex;
+      justify-content: end;
+  }
+  .navbar-button ul{
+      margin-left: 12px;
+  }
+  .navbar-button ul li a{
+      text-decoration: none;
+      color: #00033c ;
+      border: 1px solid var(--white);
+      padding: 8px;  
+      border-radius: 8px;
+      font-weight: bold;
+      font-size: 14px;
+  }
+  .navbar-button ul li a:hover{
+      border: 1px solid gray;
+      color:#005c6b;
+  }
+
+
+  .circle-container {
+      overflow: hidden;
+      position: absolute;
+      width: 100%;
+      height: 100vh;
+      top: 0;
+      display: flex;
+      justify-content: center;
+  }
+
+  .circle {
+      border-radius: 50%;
+      width: 200px;
+      height: 200px;
+      
+  }
+  .pink{
+      
+      border-radius: 50%;
+      width: 100px;
+      height: 100px;
+      position: absolute;
+      right: -40px;
+      top: 630px;
+      background: linear-gradient(to right, #fea7af, #f5cbd5);
+      margin-top: -50px; /* Ajusta este valor para centrar verticalmente el círculo */
+      
+  }
+  .green{
+      border-radius: 50%;
+      width: 30px;
+      height: 30px;
+      position: absolute;
+      right: 30px;
+      top: 620px;
+      background:linear-gradient(to top,#005c6b , #01a5b4);
+      margin-top: -50px; /* Ajusta este valor para centrar verticalmente el círculo */
+  }
+
+  .blue-circle{
+      position: absolute;
+      background: linear-gradient(to left, #1c2697, #00033c);
+      margin-top: -50px; /* Ajusta este valor para centrar verticalmente el círculo */
+      right: -60px;
+  }
+
+  .pink-circle{
+      position: absolute;
+      right: 120px;
+      top: -40px;
+      background: linear-gradient(to right, #ffa2ad, #feb6be);
+      margin-top: -50px; /* Ajusta este valor para centrar verticalmente el círculo */
+  }
+  .green-circle{
+      position: absolute;
+      left: -90px;
+      top: 300px;
+      background:linear-gradient(to top,#005c6b , #01a5b4);
+      margin-top: -50px; /* Ajusta este valor para centrar verticalmente el círculo */
+  }
+
+
+
+  .right {
+      
+      background-color: #fff;
+      width: 50%;
+      height: 100%; /* Solo para propósitos de demostración */
+      display: flex;
+      justify-content: center;
+      align-items: center;
+  }
+  .login-container {
+      background-color: #fff;
+      padding: 20px;
+      border-radius: 5px;
+      box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
+      width: 300px;
+  }
+
+  .login-container h2 {
+      text-align:left;
+      font-weight: 700;
+      color: #00033c;
+      font-size: 32px;
+  }
+
+  .login-container input[type="text"],
+  .login-container input[type="password"] {
+      width: calc(100% - 22px); /* Ajuste del ancho para compensar el ancho del borde y el margen */
+      padding: 10px;
+      margin: 10px 0;
+      border: none;
+      font-size: 16px;
+      border-bottom: 1px solid #ccc; /* Establecer solo el borde inferior */
+      box-sizing: border-box;
+      transition: border-bottom-color 0.3s ease; /* Transición de color del borde inferior */
+  }
+  .login-container input[type="text"]:focus,
+  .login-container input[type="password"]:focus {
+      border-bottom-color: #4caf50; /* Cambiar el color del borde inferior al enfocar */
+  }
+
+  .login-container label {
+      display: block;
+      margin-bottom: 10px;
+  }
+
+  .login-container input[type="checkbox"] {
+      
+      margin-right: 5px;
+      color: #01a5b4;
+
+  }
+  .check_text{
+      font-size: 12px;
+      color: #8b8b8b;
+  }
+
+  .login-container input[type="submit"]
+   {
+      width: 100%;
+      background-color: #99eae1;
+      color: white;
+      border: none;
+      padding: 10px;
+      margin-bottom: 15px;
+      border-radius: 15px;
+      cursor: pointer;
+      text-align: center;
+      text-decoration: none; /* Para eliminar el subrayado predeterminado del enlace */
+      display: block; /* Para hacer que el enlace ocupe todo el ancho */
+      transition: background-color 0.3s ease;
+  }
+  .login-container a{
+    text-decoration: none;
+    color: #8b8b8b;
+    font-size: 15px;
+  }
+
+  .login-container input[type="submit"]:hover {
+      background-color: #23867b;
+  }
+
+  .login-container a:hover {
+    color: black;
+}
+
+  /*.login-container input[type="submit"]:hover,
+  .login-container a:hover {
+      background-color: #4af7e3;
+  }*/
