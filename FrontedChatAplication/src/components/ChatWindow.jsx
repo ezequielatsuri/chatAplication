@@ -2,12 +2,10 @@ import React, { useState, useEffect } from 'react';
 import axios from 'axios';
 import './ChatWindow.css';
 
-const ChatWindow = ({ conversation, currentUser }) => {
-  const [messages, setMessages] = useState([]);
-  
+const ChatWindow = ({ conversation, currentUser, messages }) => {
   useEffect(() => {
     if (conversation && currentUser) {
-      axios.get(`/messages/between/${1}/${2}`)
+      axios.get(`/api/messages/between/${currentUser.id}/${conversation.id}`)
         .then(response => {
           setMessages(response.data);
         })
