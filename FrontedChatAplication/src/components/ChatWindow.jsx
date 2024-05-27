@@ -2,13 +2,12 @@ import React, { useState, useEffect } from 'react';
 import axios from 'axios';
 import './ChatWindow.css';
 
-const ChatWindow = ({ conversation }) => {
+const ChatWindow = ({ conversation, currentUser }) => {
   const [messages, setMessages] = useState([]);
-
+  
   useEffect(() => {
-    if (conversation) {
-      // Cargar mensajes desde el backend
-      axios.get(`http://localhost:8000/api/messages/${conversation.id}`)
+    if (conversation && currentUser) {
+      axios.get(`/messages/between/${1}/${2}`)
         .then(response => {
           setMessages(response.data);
         })
@@ -16,7 +15,7 @@ const ChatWindow = ({ conversation }) => {
           console.error('Error fetching messages', error);
         });
     }
-  }, [conversation]);
+  }, [conversation, currentUser]);
 
   return (
     <div className="chat-window">
@@ -25,8 +24,8 @@ const ChatWindow = ({ conversation }) => {
           <h2>{conversation.name}</h2>
           <div className="messages">
             {messages.map((message, index) => (
-              <div key={index} className="message">
-                {message.content}
+              <div key={index} className={`message ${message.sender_id === currentUser.id ? 'sent' : 'received'}`}>
+                <p>{message.content}</p>
               </div>
             ))}
           </div>

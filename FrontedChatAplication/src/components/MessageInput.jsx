@@ -2,24 +2,28 @@ import React, { useState } from 'react';
 import axios from 'axios';
 import './MessageInput.css';
 
-const MessageInput = ({ conversation, onNewMessage }) => {
+const MessageInput = ({ conversation, currentUser, onNewMessage }) => {
   const [newMessage, setNewMessage] = useState('');
 
-  const handleSendMessage = () => {
+  const handleSendMessage = async () => {
+    if (!currentUser || !conversation) {
+      console.error('currentUser or conversation is undefined');
+      return;
+    }
+
     const message = {
+      sender_id: currentUser.id,
+      receiver_id: conversation.id,
       content: newMessage,
-      conversationId: conversation.id,
-      // Agrega otros campos necesarios
     };
 
-    axios.post('http://localhost:8000/api/messages', message)
-      .then(response => {
-        onNewMessage(response.data);
-        setNewMessage('');
-      })
-      .catch(error => {
-        console.error('Error sending message', error);
-      });
+    try {
+      const response = await axios.post('/messages', message);
+      onNewMessage(response.data);
+      setNewMessage('');
+    } catch (error) {
+      console.error('Error sending message', error);
+    }
   };
 
   return (
@@ -29,9 +33,9 @@ const MessageInput = ({ conversation, onNewMessage }) => {
         value={newMessage} 
         onChange={(e) => setNewMessage(e.target.value)} 
         placeholder="Type your message..."
-        disabled={!conversation}
+        disabled={!conversation || !currentUser}
       />
-      <button onClick={handleSendMessage} disabled={!conversation}>Send</button>
+      <button onClick={handleSendMessage} disabled={!conversation || !currentUser}>Send</button>
     </div>
   );
 };

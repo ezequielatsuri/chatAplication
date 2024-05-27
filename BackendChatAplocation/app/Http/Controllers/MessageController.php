@@ -66,4 +66,18 @@ class MessageController extends Controller
         $message->delete();
         return response()->json('mensaje eliminado');
     }
+
+    public function getMessagesBetweenUsers($userId1, $userId2)
+    {
+        $messages = Message::where(function ($query) use ($userId1, $userId2) {
+            $query->where('sender_id', $userId1)
+                  ->where('receiver_id', $userId2);
+        })->orWhere(function ($query) use ($userId1, $userId2) {
+            $query->where('sender_id', $userId2)
+                  ->where('receiver_id', $userId1);
+        })->orderBy('sent_at', 'asc')->get();
+
+        return response()->json($messages);
+    }
+
 }

@@ -27,6 +27,8 @@ Route::middleware('auth:sanctum')->group(function(){
     Route::apiResource('/contacts', ContactController::class)->names('contacts');
     Route::apiResource('/messages', MessageController::class)->names('messages');
     Route::apiResource('/media', MediaController::class)->names('media');
+    Route::get('messages/between/{userId1}/{userId2}', [MessageController::class, 'getMessagesBetweenUsers']);
+
 });
 
 // Rutas de autenticación pública
