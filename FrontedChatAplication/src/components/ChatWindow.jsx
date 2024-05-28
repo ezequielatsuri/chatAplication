@@ -3,18 +3,7 @@ import axios from 'axios';
 import './ChatWindow.css';
 
 const ChatWindow = ({ conversation, currentUser, messages }) => {
-  useEffect(() => {
-    if (conversation && currentUser) {
-      axios.get(`/api/messages/between/${currentUser.id}/${conversation.id}`)
-        .then(response => {
-          setMessages(response.data);
-        })
-        .catch(error => {
-          console.error('Error fetching messages', error);
-        });
-    }
-  }, [conversation, currentUser]);
-
+  
   return (
     <div className="chat-window">
       {conversation ? (

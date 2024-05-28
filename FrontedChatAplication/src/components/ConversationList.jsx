@@ -7,10 +7,14 @@ const ConversationList = ({ selectConversation }) => {
   const [newContact, setNewContact] = useState('');
   const [profile, setProfile] = useState({ name: 'John Doe', email: 'john.doe@example.com' });
 
+  useEffect(() => {
+    getUser();
+    getContacts();
+  }, []);
+
   const getUser = () => {
     axios.get('/user')
       .then((res) => {
-        console.log(res);
         setProfile({
           name: res.data.name,
           email: res.data.email
@@ -24,7 +28,6 @@ const ConversationList = ({ selectConversation }) => {
   const getContacts = () => {
     axios.get('/contacts')
       .then((res) => {
-        console.log('Contacts fetched', res);
         setConversations(res.data);
       })
       .catch((err) => {
@@ -32,20 +35,14 @@ const ConversationList = ({ selectConversation }) => {
       });
   };
 
-  useEffect(() => {
-    getUser();
-    getContacts();
-  }, []);
-
   const handleAddContact = (e) => {
     e.preventDefault();
     if (newContact.trim()) {
       axios.post('/contacts', { email: newContact })
         .then(response => {
-          console.log('Contact added', response);
           setConversations([
             ...conversations,
-            { id: response.data.id, name: response.data.name, email: response.data.email }
+            { id: response.data.user_id, name: response.data.name, email: response.data.email }
           ]);
           setNewContact('');
         })
@@ -56,12 +53,9 @@ const ConversationList = ({ selectConversation }) => {
   };
 
   const handleSelectConversation = (conversation) => {
-    try {
-      if (selectConversation) {
-        selectConversation(conversation);
-      }
-    } catch (error) {
-      console.error('Error selecting conversation:', error);
+    if (selectConversation) {
+      selectConversation(conversation);
+      console.log('Conversación seleccionada en ConversationList:', conversation);
     }
   };
 

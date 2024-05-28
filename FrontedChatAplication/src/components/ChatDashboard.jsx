@@ -1,34 +1,59 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
+import axios from 'axios';
 import ConversationList from './ConversationList';
 import ChatWindow from './ChatWindow';
 import MessageInput from './MessageInput';
 import './ChatDashboard.css';
 
 const ChatDashboard = () => {
-  const currentUser = { id: 1, name: 'Current User' }; // Simulación de datos del usuario actual
+  const [currentUser, setCurrentUser] = useState(null); // Estado para el usuario actual
   const [selectedConversation, setSelectedConversation] = useState(null);
   const [messages, setMessages] = useState([]);
 
-  const handleSelectConversation = (conversation) => {
-    setSelectedConversation(conversation);
-    axios.get(`/api/messages/between/${currentUser.id}/${conversation.id}`)
+  useEffect(() => {
+    axios.get('/user') // Endpoint para obtener el usuario actual
       .then(response => {
-        if (Array.isArray(response.data)) {
-          setMessages(response.data);
-        } else {
-          setMessages([]);
-          console.error('Unexpected response data format:', response.data);
-        }
+        setCurrentUser(response.data);
+        console.log('Usuario recuperado:', response.data);
       })
       .catch(error => {
-        setMessages([]);
-        console.error('Error fetching messages', error);
+        console.error('Error fetching current user', error);
       });
+  }, []);
+
+  useEffect(() => {
+    if (currentUser) {
+      console.log('currentUser ha cambiado:', currentUser);
+    }
+  }, [currentUser]);
+
+  const handleSelectConversation = (conversation) => {
+    setSelectedConversation(conversation);
+    console.log('Conversación seleccionada en handleSelectConversation:', conversation);
+    if (currentUser) {
+      axios.get(`/messages/between/${currentUser.id}/${conversation.id}`)
+        .then(response => {
+          if (Array.isArray(response.data)) {
+            setMessages(response.data);
+          } else {
+            setMessages([]);
+            console.error('Unexpected response data format:', response.data);
+          }
+        })
+        .catch(error => {
+          setMessages([]);
+          console.error('Error fetching messages', error);
+        });
+    }
   };
 
   const handleNewMessage = (message) => {
     setMessages(prevMessages => [...prevMessages, message]);
   };
+
+  if (!currentUser) {
+    return <div>Loading...</div>; // Muestra un mensaje de carga mientras se obtiene el usuario actual
+  }
 
   return (
     <div className="chat-dashboard">
