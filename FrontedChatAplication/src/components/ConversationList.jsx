@@ -54,7 +54,7 @@ const ConversationList = ({ selectConversation }) => {
 
   const handleSelectConversation = (conversation) => {
     if (selectConversation) {
-      selectConversation(conversation);
+      selectConversation(conversation); // Pasa el objeto de la conversación completo
       console.log('Conversación seleccionada en ConversationList:', conversation);
     }
   };

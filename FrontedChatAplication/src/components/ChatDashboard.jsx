@@ -27,11 +27,10 @@ const ChatDashboard = () => {
     }
   }, [currentUser]);
 
-  const handleSelectConversation = (conversation) => {
-    setSelectedConversation(conversation);
-    console.log('Conversación seleccionada en handleSelectConversation:', conversation);
-    if (currentUser) {
-      axios.get(`/messages/between/${currentUser.id}/${conversation.id}`)
+  useEffect(() => {
+    if (currentUser && selectedConversation) {
+      console.log('selectedConversation ha cambiado:', selectedConversation);
+      axios.get(`/messages/between/${currentUser.id}/${selectedConversation.user_id}`)
         .then(response => {
           if (Array.isArray(response.data)) {
             setMessages(response.data);
@@ -45,6 +44,11 @@ const ChatDashboard = () => {
           console.error('Error fetching messages', error);
         });
     }
+  }, [selectedConversation, currentUser]);
+
+  const handleSelectConversation = (conversation) => {
+    setSelectedConversation(conversation);
+    console.log('Conversación seleccionada en handleSelectConversation:', conversation);
   };
 
   const handleNewMessage = (message) => {

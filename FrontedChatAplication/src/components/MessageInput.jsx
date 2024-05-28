@@ -13,7 +13,7 @@ const MessageInput = ({ conversation, currentUser, onNewMessage }) => {
 
     const message = {
       sender_id: currentUser.id,
-      receiver_id: conversation.id,
+      receiver_id: conversation.user_id,
       content: newMessage,
     };
 

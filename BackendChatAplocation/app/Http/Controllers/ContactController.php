@@ -20,6 +20,7 @@ class ContactController extends Controller
         $contacts = $contacts->map(function ($contact) {
             return [
                 'id' => $contact->id,
+                'user_id' => $contact->contact_id, // Aquí incluimos el contact_id
                 'name' => $contact->contact->name,
                 'email' => $contact->contact->email,
             ];
@@ -58,6 +59,7 @@ class ContactController extends Controller
 
         return response()->json([
             'id' => $contact->id,
+            'user_id' => $contactUser->id, // Aquí devolvemos el contact_id
             'name' => $contactUser->name,
             'email' => $contactUser->email,
         ], 201);
