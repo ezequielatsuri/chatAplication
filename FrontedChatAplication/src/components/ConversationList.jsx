@@ -42,7 +42,7 @@ const ConversationList = ({ selectConversation }) => {
         .then(response => {
           setConversations([
             ...conversations,
-            { id: response.data.user_id, name: response.data.name, email: response.data.email }
+            { id: response.data.id,user_id:response.data.user_id, name: response.data.name, email: response.data.email }
           ]);
           setNewContact('');
         })
