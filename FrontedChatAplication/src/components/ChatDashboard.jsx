@@ -34,6 +34,7 @@ const ChatDashboard = () => {
         .then(response => {
           if (Array.isArray(response.data)) {
             setMessages(response.data);
+            console.log(response.data);
           } else {
             setMessages([]);
             console.error('Unexpected response data format:', response.data);
