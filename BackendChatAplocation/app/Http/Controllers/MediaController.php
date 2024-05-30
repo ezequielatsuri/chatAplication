@@ -27,7 +27,7 @@ class MediaController extends Controller
             'url' => 'required|file|mimes:jpeg,png,jpg,gif,mp4,mov,avi|max:20480', // Ajustar los tipos y tamaño máximo de archivo según necesidades
         ]);
 
-        $path = $request->file('url')->store('media');
+        $path = $request->file('url')->store('media', 'public');
 
         $media = Media::create([
             'message_id' => $request->input('message_id'),
@@ -57,10 +57,10 @@ class MediaController extends Controller
 
         if ($request->hasFile('url')) {
             // Borrar el archivo anterior
-            Storage::delete($media->url);
+            Storage::disk('public')->delete($media->url);
 
             // Almacenar el nuevo archivo
-            $path = $request->file('url')->store('media');
+            $path = $request->file('url')->store('media', 'public');
             $media->update([
                 'type' => $request->file('url')->getClientMimeType(),
                 'url' => $path,
@@ -76,7 +76,7 @@ class MediaController extends Controller
     public function destroy(Media $media)
     {
         // Borrar el archivo del almacenamiento
-        Storage::delete($media->url);
+        Storage::disk('public')->delete($media->url);
 
         $media->delete();
         return response()->json('archivo eliminado');

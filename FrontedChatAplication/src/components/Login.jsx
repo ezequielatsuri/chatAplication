@@ -24,6 +24,10 @@ const Login = () => {
             });
     };
 
+    const redirectToRegister = () => {
+        navigate('/register');  // Redirige al usuario a /register
+    };
+
     return (
         <div className="main1">
             <div className="container">
@@ -74,7 +78,11 @@ const Login = () => {
                                 <input type="checkbox" name="keep_logged" value="1" /> Keep me logged in
                             </label>
                             <input type="submit" value="Log in" />
-                            <a href="#">Forgot Password?</a>
+                            <div className="registro">
+                            <p>¿No tienes una cuenta?</p>
+                            <a href="#" onClick={redirectToRegister}>Registrate</a>
+                            </div>
+                            
                         </form>
                     </div>
                 </div>

@@ -1,5 +1,6 @@
 import React, { useState } from 'react';
 import axios from 'axios';
+import { useNavigate } from 'react-router-dom';
 import './Register.css';
 
 const Register = () => {
@@ -9,6 +10,7 @@ const Register = () => {
   const [confirmPassword, setConfirmPassword] = useState('');
   const [error, setError] = useState('');
   const [success, setSuccess] = useState('');
+  const navigate = useNavigate();  // Llama a la función useNavigate
 
   const handleRegister = (e) => {
     e.preventDefault();
@@ -28,6 +30,10 @@ const Register = () => {
       setEmail('');
       setPassword('');
       setConfirmPassword('');
+      setTimeout(() => {
+      navigate('/login');
+      }, 3000);
+
     })
     .catch(error => {
       setError('Error registering user');

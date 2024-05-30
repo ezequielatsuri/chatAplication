@@ -4,6 +4,7 @@ namespace App\Http\Controllers;
 
 use App\Models\Message;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\Storage;
 
 class MessageController extends Controller
 {
@@ -33,6 +34,21 @@ class MessageController extends Controller
             'content' => $request->input('content'),
             'sent_at' => now()
         ]);
+
+        if ($request->hasFile('images')) {
+            $files = $request->file('images');
+
+            if (is_array($files) && count($files) > 0) {
+                foreach ($files as $file) {
+                    $filename = time() . '.' . $file->getClientOriginalName();
+                    Storage::disk('public')->putFileAs('images', $file, $filename);
+                    $message->media()->create([
+                        'url' => 'images/' . $filename,
+                        'type' => $file->getClientMimeType(),
+                    ]);
+                }
+            }
+        }
 
         return response()->json($message, 201);
     }
@@ -79,5 +95,4 @@ class MessageController extends Controller
 
         return response()->json($messages);
     }
-
 }

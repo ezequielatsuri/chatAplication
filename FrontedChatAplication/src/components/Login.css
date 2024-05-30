@@ -202,11 +202,19 @@ body {
       transition: background-color 0.3s ease;
   }
   .login-container a{
+    margin: 5px;
     text-decoration: none;
     color: #8b8b8b;
-    font-size: 15px;
-  }
+    font-size: 17px;
 
+  }
+  .registro{
+    display: flex;
+    flex-direction: row;
+  }
+  .registro p{
+    margin: 5px;
+  }
   .login-container input[type="submit"]:hover {
       background-color: #23867b;
   }
