@@ -11,6 +11,12 @@ const MessageInput = ({ conversation, currentUser, onNewMessage }) => {
       return;
     }
 
+    const token = localStorage.getItem('token'); // Obtener el token del almacenamiento local
+    if (!token) {
+      console.error('No token found');
+      return;
+    }
+
     const message = {
       sender_id: currentUser.id,
       receiver_id: conversation.user_id,
@@ -18,7 +24,11 @@ const MessageInput = ({ conversation, currentUser, onNewMessage }) => {
     };
 
     try {
-      const response = await axios.post('/messages', message);
+      const response = await axios.post('/messages', message, {
+        headers: {
+          'Authorization': `Bearer ${token}`
+        }
+      });
       onNewMessage(response.data);
       setNewMessage('');
     } catch (error) {

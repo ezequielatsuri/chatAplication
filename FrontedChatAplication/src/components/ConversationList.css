@@ -64,3 +64,23 @@
 .from-messages {
   background: #c8f6fc; /* Different color for unregistered contacts */
 }
+
+.profile-container {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 10px;
+}
+
+.logout-button {
+  background-color: #f44336;
+  color: white;
+  border: none;
+  padding: 8px 16px;
+  cursor: pointer;
+  border-radius: 4px;
+}
+
+.logout-button:hover {
+  background-color: #d32f2f;
+}

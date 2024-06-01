@@ -1,55 +1,45 @@
 import React, { useState, useEffect } from 'react';
 import axios from 'axios';
+import { useNavigate } from 'react-router-dom';
 import './ConversationList.css';
 
 const ConversationList = ({ selectConversation, currentUser }) => {
   const [conversations, setConversations] = useState([]);
   const [newContact, setNewContact] = useState('');
-  const [profile, setProfile] = useState({ name: 'John Doe', email: 'john.doe@example.com' });
-
-  useEffect(() => {
-    getUser();
-    getContacts();
-  }, []);
+  const navigate = useNavigate();
 
   useEffect(() => {
     if (currentUser) {
-      console.log('Fetching contacts from messages for user', currentUser.id);
+      getContacts();
       getContactsFromMessages(currentUser.id);
     }
   }, [currentUser]);
 
-  const getUser = () => {
-    axios.get('/user')
-      .then((res) => {
-        setProfile({
-          name: res.data.name,
-          email: res.data.email
-        });
-      })
-      .catch((err) => {
-        console.error('Error fetching the user:', err);
-      });
-  };
-
   const getContacts = () => {
-    axios.get('/contacts')
+    axios.get('/contacts', {
+      headers: {
+        'Authorization': `Bearer ${localStorage.getItem('token')}`
+      }
+    })
       .then((res) => {
         setConversations(res.data);
+        console.log('Contacts fetched:', res.data);
       })
       .catch((err) => {
         console.error('Error fetching contacts:', err);
       });
   };
 
-  // Function to check if a contact is a duplicate
   const isDuplicate = (contact, conversations) => {
-    // Checks if any conversation has the same id or email as the contact
     return conversations.some(conv => conv.id === contact.id || conv.email === contact.email);
   };
 
   const getContactsFromMessages = (userId) => {
-    axios.get(`/contacts/senders-from-messages/${userId}`)
+    axios.get(`/contacts/senders-from-messages/${userId}`, {
+      headers: {
+        'Authorization': `Bearer ${localStorage.getItem('token')}`
+      }
+    })
       .then((res) => {
         console.log(res.data, 'contactos de mensajes');
         const messageContacts = res.data.map(contact => ({
@@ -60,12 +50,10 @@ const ConversationList = ({ selectConversation, currentUser }) => {
           fromMessages: true
         }));
 
-        // Avoid duplicates by checking before adding
         setConversations(prevConversations => {
           const combinedConversations = [...prevConversations];
 
           messageContacts.forEach(contact => {
-            // Add only if contact is not a duplicate
             if (!isDuplicate(contact, combinedConversations)) {
               combinedConversations.push(contact);
             }
@@ -82,7 +70,11 @@ const ConversationList = ({ selectConversation, currentUser }) => {
   const handleAddContact = (e) => {
     e.preventDefault();
     if (newContact.trim()) {
-      axios.post('/contacts', { email: newContact })
+      axios.post('/contacts', { email: newContact }, {
+        headers: {
+          'Authorization': `Bearer ${localStorage.getItem('token')}`
+        }
+      })
         .then(response => {
           const newContactData = {
             id: response.data.id,
@@ -91,7 +83,6 @@ const ConversationList = ({ selectConversation, currentUser }) => {
             email: response.data.email,
             fromMessages: false
           };
-          // Check for duplicates before adding the new contact
           if (!isDuplicate(newContactData, conversations)) {
             setConversations(prevConversations => [
               ...prevConversations,
@@ -113,13 +104,35 @@ const ConversationList = ({ selectConversation, currentUser }) => {
     }
   };
 
+  const handleLogout = () => {
+    axios.post('/logout', {}, {
+      headers: {
+        'Authorization': `Bearer ${localStorage.getItem('token')}`
+      }
+    })
+      .then(() => {
+        localStorage.removeItem('token');
+        navigate('/login');
+      })
+      .catch((err) => {
+        console.error('Error during logout:', err);
+      });
+  };
+
   return (
     <div className="conversation-list-container">
       <div className="profile-container">
         <div className="profile-info">
-          <p><strong>Name:</strong> {profile.name}</p>
-          <p><strong>Email:</strong> {profile.email}</p>
+          {currentUser ? (
+            <>
+              <p><strong>Name:</strong> {currentUser.name}</p>
+              <p><strong>Email:</strong> {currentUser.email}</p>
+            </>
+          ) : (
+            <p>Loading profile...</p>
+          )}
         </div>
+        <button onClick={handleLogout} className="logout-button">Logout</button>
       </div>
       <form onSubmit={handleAddContact} className="add-contact-form">
         <input
