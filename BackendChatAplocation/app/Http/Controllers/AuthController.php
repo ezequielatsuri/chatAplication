@@ -2,8 +2,11 @@
 
 namespace App\Http\Controllers;
 
+use App\Models\User;
+use Dotenv\Validator;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
+use Illuminate\Support\Facades\Hash;
 
 class AuthController extends Controller
 {
@@ -36,4 +39,21 @@ class AuthController extends Controller
         ]);
     }
 
+    public function register(Request $request)
+    {
+
+        $user = User::create([
+            'name' => $request->name,
+            'email' => $request->email,
+            'password' => Hash::make($request->password),
+        ]);
+
+        $token = $user->createToken('auth_token');
+
+        return response()->json([
+            'message' => 'User registered successfully',
+            'token' => $token->plainTextToken,
+            'user' => $user
+        ], 201);
+    }
 }
