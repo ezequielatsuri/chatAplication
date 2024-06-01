@@ -26,12 +26,21 @@ const MessageInput = ({ conversation, currentUser, onNewMessage }) => {
     }
   };
 
+  // Función para manejar la tecla presionada
+  const handleKeyDown = (e) => {
+    if (e.key === 'Enter') { // Verifica si la tecla presionada es Enter
+      e.preventDefault(); // Previene el comportamiento por defecto del Enter (que podría ser un salto de línea)
+      handleSendMessage(); // Llama a la función para enviar el mensaje
+    }
+  };
+
   return (
     <div className="message-input">
       <input 
         type="text" 
         value={newMessage} 
         onChange={(e) => setNewMessage(e.target.value)} 
+        onKeyDown={handleKeyDown} // Añade el evento onKeyDown al campo de entrada
         placeholder="Type your message..."
         disabled={!conversation || !currentUser}
       />

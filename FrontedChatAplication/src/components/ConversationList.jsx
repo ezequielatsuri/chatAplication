@@ -42,25 +42,37 @@ const ConversationList = ({ selectConversation, currentUser }) => {
       });
   };
 
+  // Function to check if a contact is a duplicate
+  const isDuplicate = (contact, conversations) => {
+    // Checks if any conversation has the same id or email as the contact
+    return conversations.some(conv => conv.id === contact.id || conv.email === contact.email);
+  };
+
   const getContactsFromMessages = (userId) => {
     axios.get(`/contacts/senders-from-messages/${userId}`)
       .then((res) => {
+        console.log(res.data, 'contactos de mensajes');
         const messageContacts = res.data.map(contact => ({
           id: contact.id,
-          user_id: contact.id, // Asegúrate de tener el campo user_id correcto
+          user_id: contact.id,
           name: contact.name,
           email: contact.email,
+          fromMessages: true
         }));
 
-        const updatedConversations = [...conversations];
+        // Avoid duplicates by checking before adding
+        setConversations(prevConversations => {
+          const combinedConversations = [...prevConversations];
 
-        messageContacts.forEach(contact => {
-          if (!updatedConversations.some(conv => conv.id === contact.id)) {
-            updatedConversations.push(contact);
-          }
+          messageContacts.forEach(contact => {
+            // Add only if contact is not a duplicate
+            if (!isDuplicate(contact, combinedConversations)) {
+              combinedConversations.push(contact);
+            }
+          });
+
+          return combinedConversations;
         });
-
-        setConversations(updatedConversations);
       })
       .catch((err) => {
         console.error('Error fetching contacts from messages:', err);
@@ -72,10 +84,20 @@ const ConversationList = ({ selectConversation, currentUser }) => {
     if (newContact.trim()) {
       axios.post('/contacts', { email: newContact })
         .then(response => {
-          setConversations([
-            ...conversations,
-            { id: response.data.id, user_id: response.data.user_id, name: response.data.name, email: response.data.email }
-          ]);
+          const newContactData = {
+            id: response.data.id,
+            user_id: response.data.user_id,
+            name: response.data.name,
+            email: response.data.email,
+            fromMessages: false
+          };
+          // Check for duplicates before adding the new contact
+          if (!isDuplicate(newContactData, conversations)) {
+            setConversations(prevConversations => [
+              ...prevConversations,
+              newContactData
+            ]);
+          }
           setNewContact('');
         })
         .catch(error => {
@@ -86,7 +108,7 @@ const ConversationList = ({ selectConversation, currentUser }) => {
 
   const handleSelectConversation = (conversation) => {
     if (selectConversation) {
-      selectConversation(conversation); // Pasa el objeto de la conversación completo
+      selectConversation(conversation);
       console.log('Conversación seleccionada en ConversationList:', conversation);
     }
   };
@@ -113,7 +135,7 @@ const ConversationList = ({ selectConversation, currentUser }) => {
           <div
             key={conversation.id}
             onClick={() => handleSelectConversation(conversation)}
-            className="conversation-item"
+            className={`conversation-item ${conversation.fromMessages ? 'from-messages' : ''}`}
           >
             <p><strong>Name:</strong> {conversation.name}</p>
             <p><strong>Email:</strong> {conversation.email}</p>
