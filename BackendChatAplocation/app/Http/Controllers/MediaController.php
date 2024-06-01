@@ -3,7 +3,10 @@
 namespace App\Http\Controllers;
 
 use App\Models\Media;
+use App\Models\Message;
+use App\Models\User;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Storage;
 
 class MediaController extends Controller
@@ -81,4 +84,7 @@ class MediaController extends Controller
         $media->delete();
         return response()->json('archivo eliminado');
     }
+
+
+
 }

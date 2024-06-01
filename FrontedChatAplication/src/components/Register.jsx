@@ -42,7 +42,8 @@ const Register = () => {
   };
 
   return (
-    <div className="register-container">
+    <div className="main2">
+      <div className="register-container">
       <h2>Register</h2>
       {error && <p className="error">{error}</p>}
       {success && <p className="success">{success}</p>}
@@ -90,6 +91,8 @@ const Register = () => {
         <button id = "boton1"type="submit">Register</button>
       </form>
     </div>
+    </div>
+    
   );
 };
 

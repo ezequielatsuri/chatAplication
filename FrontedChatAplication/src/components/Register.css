@@ -1,3 +1,12 @@
+.main2{
+  display: flex;
+  height: 100vh;
+  justify-content: center;
+  align-content: center;
+  align-items: center;
+ 
+  background-color: #c8c8e2;
+}
 .register-container {
     width: 300px;
     margin: 0 auto;

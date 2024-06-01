@@ -1,9 +1,10 @@
 <?php
-
 namespace App\Http\Controllers;
 
 use App\Models\Message;
+use App\Models\User;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Storage;
 
 class MessageController extends Controller
@@ -83,6 +84,9 @@ class MessageController extends Controller
         return response()->json('mensaje eliminado');
     }
 
+    /**
+     * Get messages between two users.
+     */
     public function getMessagesBetweenUsers($userId1, $userId2)
     {
         $messages = Message::where(function ($query) use ($userId1, $userId2) {
@@ -94,5 +98,27 @@ class MessageController extends Controller
         })->orderBy('sent_at', 'asc')->get();
 
         return response()->json($messages);
+    }
+    public function getSenders($userId)
+    {
+        try {
+            // Obtiene los IDs de los usuarios que han enviado mensajes al usuario especificado
+            $senderIds = Message::where('receiver_id', $userId)
+                                ->pluck('sender_id')
+                                ->unique();
+
+            // Comprueba si hay remitentes encontrados
+            if ($senderIds->isEmpty()) {
+                return response()->json(['message' => 'No hay remitentes encontrados'], 404);
+            }
+
+            // Obtiene los detalles de los usuarios remitentes
+            $senders = User::whereIn('id', $senderIds)->get();
+
+            // Retorna los detalles de los remitentes en formato JSON
+            return response()->json($senders);
+        } catch (\Exception $e) {
+            return response()->json(['message' => 'Error al obtener remitentes', 'error' => $e->getMessage()], 500);
+        }
     }
 }

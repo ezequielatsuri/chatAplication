@@ -28,8 +28,11 @@ Route::middleware('auth:sanctum')->group(function(){
     Route::apiResource('/messages', MessageController::class)->names('messages');
     Route::apiResource('/media', MediaController::class)->names('media');
     Route::get('messages/between/{userId1}/{userId2}', [MessageController::class, 'getMessagesBetweenUsers']);
-
+    Route::get('/contacts/senders-from-messages/{userId}', [MessageController::class, 'getSenders']);
 });
+
+
+
 
 // Rutas de autenticación pública
 Route::post('/login', [AuthController::class, 'login']);

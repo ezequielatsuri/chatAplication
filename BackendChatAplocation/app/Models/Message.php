@@ -24,7 +24,7 @@ class Message extends Model
 
     public function receiver()
     {
-        return $this->belongsTo(User::class, 'receiver_id');
+        return $this->hasMany(User::class, 'receiver_id');
     }
 
     public function media()
@@ -32,3 +32,4 @@ class Message extends Model
         return $this->hasMany(Media::class);
     }
 }
+

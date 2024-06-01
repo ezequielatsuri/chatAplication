@@ -63,7 +63,10 @@ const ChatDashboard = () => {
   return (
     <div className="chat-dashboard">
       <div className="sidebar">
-        <ConversationList selectConversation={handleSelectConversation} />
+        <ConversationList 
+          selectConversation={handleSelectConversation} 
+          currentUser={currentUser} 
+        />
       </div>
       <div className="main">
         <ChatWindow 

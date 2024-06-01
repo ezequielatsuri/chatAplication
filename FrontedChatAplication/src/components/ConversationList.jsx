@@ -2,7 +2,7 @@ import React, { useState, useEffect } from 'react';
 import axios from 'axios';
 import './ConversationList.css';
 
-const ConversationList = ({ selectConversation }) => {
+const ConversationList = ({ selectConversation, currentUser }) => {
   const [conversations, setConversations] = useState([]);
   const [newContact, setNewContact] = useState('');
   const [profile, setProfile] = useState({ name: 'John Doe', email: 'john.doe@example.com' });
@@ -11,6 +11,13 @@ const ConversationList = ({ selectConversation }) => {
     getUser();
     getContacts();
   }, []);
+
+  useEffect(() => {
+    if (currentUser) {
+      console.log('Fetching contacts from messages for user', currentUser.id);
+      getContactsFromMessages(currentUser.id);
+    }
+  }, [currentUser]);
 
   const getUser = () => {
     axios.get('/user')
@@ -35,6 +42,31 @@ const ConversationList = ({ selectConversation }) => {
       });
   };
 
+  const getContactsFromMessages = (userId) => {
+    axios.get(`/contacts/senders-from-messages/${userId}`)
+      .then((res) => {
+        const messageContacts = res.data.map(contact => ({
+          id: contact.id,
+          user_id: contact.id, // Asegúrate de tener el campo user_id correcto
+          name: contact.name,
+          email: contact.email,
+        }));
+
+        const updatedConversations = [...conversations];
+
+        messageContacts.forEach(contact => {
+          if (!updatedConversations.some(conv => conv.id === contact.id)) {
+            updatedConversations.push(contact);
+          }
+        });
+
+        setConversations(updatedConversations);
+      })
+      .catch((err) => {
+        console.error('Error fetching contacts from messages:', err);
+      });
+  };
+
   const handleAddContact = (e) => {
     e.preventDefault();
     if (newContact.trim()) {
@@ -42,7 +74,7 @@ const ConversationList = ({ selectConversation }) => {
         .then(response => {
           setConversations([
             ...conversations,
-            { id: response.data.id,user_id:response.data.user_id, name: response.data.name, email: response.data.email }
+            { id: response.data.id, user_id: response.data.user_id, name: response.data.name, email: response.data.email }
           ]);
           setNewContact('');
         })
