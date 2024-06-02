@@ -1,9 +1,7 @@
-import React, { useState, useEffect } from 'react';
-import axios from 'axios';
+import React from 'react';
 import './ChatWindow.css';
 
 const ChatWindow = ({ conversation, currentUser, messages }) => {
-  
   return (
     <div className="chat-window">
       {conversation ? (
@@ -11,8 +9,11 @@ const ChatWindow = ({ conversation, currentUser, messages }) => {
           <h2>{conversation.name}</h2>
           <div className="messages">
             {messages.map((message, index) => (
-              <div key={index} className={`message ${message.sender_id === currentUser.id ? 'sent' : 'received'}`}>
+              <div key={index} className={`message ${message.sender_id == currentUser.id ? 'sent' : 'received'}`}>
                 <p>{message.content}</p>
+                {message.media && message.media.map((media, mediaIndex) => (
+                  <img key={mediaIndex} src={`/${media.url}`} alt={`Media ${mediaIndex}`} />
+                ))}
               </div>
             ))}
           </div>

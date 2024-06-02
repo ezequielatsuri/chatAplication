@@ -4,6 +4,7 @@ import './MessageInput.css';
 
 const MessageInput = ({ conversation, currentUser, onNewMessage }) => {
   const [newMessage, setNewMessage] = useState('');
+  const [selectedFiles, setSelectedFiles] = useState([]);
 
   const handleSendMessage = async () => {
     if (!currentUser || !conversation) {
@@ -11,37 +12,45 @@ const MessageInput = ({ conversation, currentUser, onNewMessage }) => {
       return;
     }
 
-    const token = localStorage.getItem('token'); // Obtener el token del almacenamiento local
+    const token = localStorage.getItem('token');
     if (!token) {
       console.error('No token found');
       return;
     }
 
-    const message = {
-      sender_id: currentUser.id,
-      receiver_id: conversation.user_id,
-      content: newMessage,
-    };
+    const formData = new FormData();
+    formData.append('sender_id', currentUser.id);
+    formData.append('receiver_id', conversation.user_id);
+    formData.append('content', newMessage);
+    selectedFiles.forEach((file, index) => {
+      formData.append(`images[${index}]`, file);
+    });
 
     try {
-      const response = await axios.post('/messages', message, {
+      const response = await axios.post('/messages', formData, {
         headers: {
-          'Authorization': `Bearer ${token}`
+          'Authorization': `Bearer ${token}`,
+          'Content-Type': 'multipart/form-data'
         }
       });
       onNewMessage(response.data);
+      console.log(response.data,'este el mensaje enviado')
       setNewMessage('');
+      setSelectedFiles([]);
     } catch (error) {
       console.error('Error sending message', error);
     }
   };
 
-  // Función para manejar la tecla presionada
   const handleKeyDown = (e) => {
-    if (e.key === 'Enter') { // Verifica si la tecla presionada es Enter
-      e.preventDefault(); // Previene el comportamiento por defecto del Enter (que podría ser un salto de línea)
-      handleSendMessage(); // Llama a la función para enviar el mensaje
+    if (e.key === 'Enter') {
+      e.preventDefault();
+      handleSendMessage();
     }
+  };
+
+  const handleFileChange = (e) => {
+    setSelectedFiles(Array.from(e.target.files));
   };
 
   return (
@@ -50,10 +59,20 @@ const MessageInput = ({ conversation, currentUser, onNewMessage }) => {
         type="text" 
         value={newMessage} 
         onChange={(e) => setNewMessage(e.target.value)} 
-        onKeyDown={handleKeyDown} // Añade el evento onKeyDown al campo de entrada
+        onKeyDown={handleKeyDown} 
         placeholder="Type your message..."
         disabled={!conversation || !currentUser}
       />
+      <input 
+        type="file" 
+        multiple 
+        onChange={handleFileChange} 
+        style={{ display: 'none' }} 
+        id="fileInput"
+      />
+      <button onClick={() => document.getElementById('fileInput').click()} disabled={!conversation || !currentUser}>
+        Select Images
+      </button>
       <button onClick={handleSendMessage} disabled={!conversation || !currentUser}>Send</button>
     </div>
   );
