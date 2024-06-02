@@ -37,7 +37,7 @@ class MessageController extends Controller
             if (is_array($files) && count($files) > 0) {
                 foreach ($files as $file) {
                     $filename = time() . '_' . $file->getClientOriginalName();
-                    Storage::disk('public')->putFileAs('images', $file, $filename);
+                    Storage::disk('public')-> putFileAs('images', $file, $filename);
                     $message->media()->create([
                         'url' => 'images/' . $filename,
                         'type' => $file->getClientMimeType(),
@@ -70,7 +70,7 @@ class MessageController extends Controller
         return response()->json('mensaje eliminado');
     }
 
-    public function getMessagesBetweenUsers($userId1, $userId2)
+  /*  public function getMessagesBetweenUsers($userId1, $userId2)
     {
         $messages = Message::where(function ($query) use ($userId1, $userId2) {
             $query->where('sender_id', $userId1)
@@ -81,7 +81,20 @@ class MessageController extends Controller
         })->orderBy('sent_at', 'asc')->get();
 
         return response()->json($messages);
-    }
+    }*/
+    public function getMessagesBetweenUsers($userId1, $userId2)
+{
+    $messages = Message::with('media')->where(function ($query) use ($userId1, $userId2) {
+        $query->where('sender_id', $userId1)
+              ->where('receiver_id', $userId2);
+    })->orWhere(function ($query) use ($userId1, $userId2) {
+        $query->where('sender_id', $userId2)
+              ->where('receiver_id', $userId1);
+    })->orderBy('sent_at', 'asc')->get();
+
+    return response()->json($messages);
+}
+
 
     public function getSenders($userId)
     {

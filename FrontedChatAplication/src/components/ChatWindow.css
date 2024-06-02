@@ -32,3 +32,11 @@
   align-self: flex-start;
   background: #f1f0f0;
 }
+
+.message-image {
+  max-width: 100%;
+  max-height: 300px;
+  margin-top: 10px;
+  border-radius: 5px;
+  display: block;
+}

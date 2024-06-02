@@ -12,7 +12,12 @@ const ChatWindow = ({ conversation, currentUser, messages }) => {
               <div key={index} className={`message ${message.sender_id == currentUser.id ? 'sent' : 'received'}`}>
                 <p>{message.content}</p>
                 {message.media && message.media.map((media, mediaIndex) => (
-                  <img key={mediaIndex} src={`/${media.url}`} alt={`Media ${mediaIndex}`} />
+                  <img 
+                    key={mediaIndex} 
+                    className="message-image"
+                    src={`http://localhost:8000/storage/${media.url}`} 
+                    alt={`Media ${mediaIndex}`} 
+                  />
                 ))}
               </div>
             ))}

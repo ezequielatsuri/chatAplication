@@ -82,24 +82,7 @@ const ChatDashboard = () => {
     );
   }
 
-  const handleLogout = () => {
-    const token = localStorage.getItem('token');
-    axios.post('/logout', {}, {
-      headers: {
-        'Authorization': `Bearer ${token}`
-      }
-    })
-    .then(response => {
-      console.log('Logout successful', response);
-      localStorage.removeItem('token');
-      setCurrentUser(null);
-      navigate('/login');
-    })
-    .catch(error => {
-      console.error('There was an error logging out!', error);
-    });
-  };
-
+ 
   return (
     <div className="chat-dashboard">
       <div className="sidebar">
@@ -107,7 +90,7 @@ const ChatDashboard = () => {
           selectConversation={handleSelectConversation} 
           currentUser={currentUser} 
         />
-        <button onClick={handleLogout}>Logout</button>
+        
       </div>
       <div className="main">
         <ChatWindow 
