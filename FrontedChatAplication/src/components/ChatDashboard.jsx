@@ -82,7 +82,6 @@ const ChatDashboard = () => {
     );
   }
 
- 
   return (
     <div className="chat-dashboard">
       <div className="sidebar">
@@ -90,7 +89,6 @@ const ChatDashboard = () => {
           selectConversation={handleSelectConversation} 
           currentUser={currentUser} 
         />
-        
       </div>
       <div className="main">
         <ChatWindow 

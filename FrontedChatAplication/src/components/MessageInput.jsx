@@ -4,7 +4,7 @@ import './MessageInput.css';
 
 const MessageInput = ({ conversation, currentUser, onNewMessage }) => {
   const [newMessage, setNewMessage] = useState('');
-  const [selectedFiles, setSelectedFiles] = useState([]);
+  const [selectedImages, setSelectedImages] = useState([]);
 
   const handleSendMessage = async () => {
     if (!currentUser || !conversation) {
@@ -12,7 +12,7 @@ const MessageInput = ({ conversation, currentUser, onNewMessage }) => {
       return;
     }
 
-    const token = localStorage.getItem('token');
+    const token = localStorage.getItem('token'); // Obtener el token del almacenamiento local
     if (!token) {
       console.error('No token found');
       return;
@@ -22,8 +22,9 @@ const MessageInput = ({ conversation, currentUser, onNewMessage }) => {
     formData.append('sender_id', currentUser.id);
     formData.append('receiver_id', conversation.user_id);
     formData.append('content', newMessage);
-    selectedFiles.forEach((file, index) => {
-      formData.append(`images[${index}]`, file);
+
+    selectedImages.forEach((image, index) => {
+      formData.append(`images[${index}]`, image);
     });
 
     try {
@@ -34,9 +35,8 @@ const MessageInput = ({ conversation, currentUser, onNewMessage }) => {
         }
       });
       onNewMessage(response.data);
-      console.log(response.data,'este el mensaje enviado')
       setNewMessage('');
-      setSelectedFiles([]);
+      setSelectedImages([]);
     } catch (error) {
       console.error('Error sending message', error);
     }
@@ -49,8 +49,8 @@ const MessageInput = ({ conversation, currentUser, onNewMessage }) => {
     }
   };
 
-  const handleFileChange = (e) => {
-    setSelectedFiles(Array.from(e.target.files));
+  const handleImageChange = (e) => {
+    setSelectedImages(Array.from(e.target.files));
   };
 
   return (
@@ -66,11 +66,15 @@ const MessageInput = ({ conversation, currentUser, onNewMessage }) => {
       <input 
         type="file" 
         multiple 
-        onChange={handleFileChange} 
-        style={{ display: 'none' }} 
+        onChange={handleImageChange} 
+        disabled={!conversation || !currentUser}
+        style={{ display: 'none' }} // Esconde el input de archivo original
         id="fileInput"
       />
-      <button onClick={() => document.getElementById('fileInput').click()} disabled={!conversation || !currentUser}>
+      <button 
+        onClick={() => document.getElementById('fileInput').click()}
+        disabled={!conversation || !currentUser}
+      >
         Select Images
       </button>
       <button onClick={handleSendMessage} disabled={!conversation || !currentUser}>Send</button>
