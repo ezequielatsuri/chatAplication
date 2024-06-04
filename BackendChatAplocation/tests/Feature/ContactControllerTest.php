@@ -15,7 +15,8 @@ class ContactControllerTest extends TestCase
     protected function authenticate()
     {
         $user = User::factory()->create();
-        $this->actingAs($user, 'api');
+        $token = $user->createToken('auth_token')->plainTextToken;
+        $this->withHeader('Authorization', 'Bearer ' . $token);
         return $user;
     }
 

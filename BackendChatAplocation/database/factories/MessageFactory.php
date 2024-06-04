@@ -15,9 +15,8 @@ class MessageFactory extends Factory
         return [
             'sender_id' => User::factory(),
             'receiver_id' => User::factory(),
-            'content' => $this->faker->text,
+            'content' => $this->faker->sentence,
             'sent_at' => now(),
-            'read_at' => null,
         ];
     }
 }

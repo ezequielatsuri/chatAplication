@@ -15,7 +15,7 @@ class MediaFactory extends Factory
         return [
             'message_id' => Message::factory(),
             'type' => 'image/jpeg',
-            'url' => $this->faker->imageUrl,
+            'url' => 'images/' . $this->faker->image('public/storage/images', 400, 300, null, false),
         ];
     }
 }

@@ -165,11 +165,13 @@ class MessageController extends Controller
      *     )
      * )
      */
+
     public function destroy(Message $message)
     {
-        $message->delete();
-        return response()->json('mensaje eliminado');
+    $message->delete();
+    return response()->json(['message' => 'mensaje eliminado']);
     }
+
 
     /**
      * @OA\Get(
