@@ -14,6 +14,7 @@
   
   .message-input button {
     padding: 10px;
+    margin-left: 10px;
     background: #007bff;
     color: white;
     border: none;
@@ -62,5 +63,4 @@
   .message-input button:disabled {
     background-color: #ccc;
   }
-  
   

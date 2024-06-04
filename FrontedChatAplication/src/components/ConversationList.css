@@ -58,7 +58,8 @@
 }
 
 .conversation-item:hover {
-  background: #cc2727; /* Change background color on hover */
+  background: #b3b2b2; /* Change background color on hover */
+
 }
 
 .from-messages {

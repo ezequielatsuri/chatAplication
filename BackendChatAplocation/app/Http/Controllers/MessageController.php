@@ -21,7 +21,7 @@ class MessageController extends Controller
             'sender_id' => 'required|exists:users,id',
             'receiver_id' => 'required|exists:users,id',
             'content' => 'required|string',
-            'images.*' => 'image|mimes:jpeg,png,jpg,gif,svg|max:2048', // Validación para las imágenes
+            'images.*' => 'image|mimes:jpeg,png,jpg,gif,mp4,svg|max:2048', // Validación para las imágenes
         ]);
 
         $message = Message::create([
