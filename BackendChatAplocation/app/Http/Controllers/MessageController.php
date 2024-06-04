@@ -6,15 +6,56 @@ use App\Models\Message;
 use App\Models\User;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Storage;
+use OpenApi\Annotations as OA;
 
+/**
+ * @OA\Tag(
+ *     name="Mensajes",
+ *     description="Operaciones sobre mensajes"
+ * )
+ */
 class MessageController extends Controller
 {
+    /**
+     * @OA\Get(
+     *     path="/api/messages",
+     *     summary="Mostrar lista de mensajes",
+     *     tags={"Mensajes"},
+     *     @OA\Response(
+     *         response=200,
+     *         description="Lista de mensajes"
+     *     )
+     * )
+     */
     public function index()
     {
         $messages = Message::all();
         return response()->json($messages);
     }
 
+    /**
+     * @OA\Post(
+     *     path="/api/messages",
+     *     summary="Crear un nuevo mensaje",
+     *     tags={"Mensajes"},
+     *     @OA\RequestBody(
+     *         required=true,
+     *         @OA\MediaType(
+     *             mediaType="multipart/form-data",
+     *             @OA\Schema(
+     *                 @OA\Property(property="sender_id", type="integer", example=1),
+     *                 @OA\Property(property="receiver_id", type="integer", example=2),
+     *                 @OA\Property(property="content", type="string", example="Hola, ¿cómo estás?"),
+     *                 @OA\Property(property="images[]", type="file", description="Archivos de imagen")
+     *             )
+     *         )
+     *     ),
+     *     @OA\Response(
+     *         response=201,
+     *         description="Mensaje creado"
+     *     )
+     * )
+     */
     public function store(Request $request)
     {
         $request->validate([
@@ -52,11 +93,51 @@ class MessageController extends Controller
         return response()->json($message, 201);
     }
 
+    /**
+     * @OA\Get(
+     *     path="/api/messages/{id}",
+     *     summary="Mostrar un mensaje específico",
+     *     tags={"Mensajes"},
+     *     @OA\Parameter(
+     *         name="id",
+     *         in="path",
+     *         required=true,
+     *         @OA\Schema(type="integer")
+     *     ),
+     *     @OA\Response(
+     *         response=200,
+     *         description="Mensaje específico"
+     *     )
+     * )
+     */
     public function show(Message $message)
     {
         return response()->json($message);
     }
 
+    /**
+     * @OA\Put(
+     *     path="/api/messages/{id}",
+     *     summary="Actualizar un mensaje",
+     *     tags={"Mensajes"},
+     *     @OA\Parameter(
+     *         name="id",
+     *         in="path",
+     *         required=true,
+     *         @OA\Schema(type="integer")
+     *     ),
+     *     @OA\RequestBody(
+     *         required=true,
+     *         @OA\JsonContent(
+     *             @OA\Property(property="content", type="string", example="Hola, ¿cómo estás?")
+     *         )
+     *     ),
+     *     @OA\Response(
+     *         response=200,
+     *         description="Mensaje actualizado"
+     *     )
+     * )
+     */
     public function update(Request $request, Message $message)
     {
         $request->validate([
@@ -67,12 +148,52 @@ class MessageController extends Controller
         return response()->json($message);
     }
 
+    /**
+     * @OA\Delete(
+     *     path="/api/messages/{id}",
+     *     summary="Eliminar un mensaje",
+     *     tags={"Mensajes"},
+     *     @OA\Parameter(
+     *         name="id",
+     *         in="path",
+     *         required=true,
+     *         @OA\Schema(type="integer")
+     *     ),
+     *     @OA\Response(
+     *         response=200,
+     *         description="Mensaje eliminado"
+     *     )
+     * )
+     */
     public function destroy(Message $message)
     {
         $message->delete();
         return response()->json('mensaje eliminado');
     }
 
+    /**
+     * @OA\Get(
+     *     path="/api/messages/between/{userId1}/{userId2}",
+     *     summary="Obtener mensajes entre dos usuarios",
+     *     tags={"Mensajes"},
+     *     @OA\Parameter(
+     *         name="userId1",
+     *         in="path",
+     *         required=true,
+     *         @OA\Schema(type="integer")
+     *     ),
+     *     @OA\Parameter(
+     *         name="userId2",
+     *         in="path",
+     *         required=true,
+     *         @OA\Schema(type="integer")
+     *     ),
+     *     @OA\Response(
+     *         response=200,
+     *         description="Mensajes entre usuarios"
+     *     )
+     * )
+     */
     public function getMessagesBetweenUsers($userId1, $userId2)
     {
         $messages = Message::with('media')->where(function ($query) use ($userId1, $userId2) {
@@ -86,6 +207,23 @@ class MessageController extends Controller
         return response()->json($messages);
     }
 
+    /**
+     * @OA\Get(
+     *     path="/api/messages/senders/{userId}",
+     *     summary="Obtener remitentes de un usuario",
+     *     tags={"Mensajes"},
+     *     @OA\Parameter(
+     *         name="userId",
+     *         in="path",
+     *         required=true,
+     *         @OA\Schema(type="integer")
+     *     ),
+     *     @OA\Response(
+     *         response=200,
+     *         description="Lista de remitentes"
+     *     )
+     * )
+     */
     public function getSenders($userId)
     {
         try {
@@ -104,4 +242,3 @@ class MessageController extends Controller
         }
     }
 }
-

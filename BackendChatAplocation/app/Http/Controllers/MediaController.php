@@ -8,11 +8,26 @@ use App\Models\User;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Storage;
+use OpenApi\Annotations as OA;
 
+/**
+ * @OA\Tag(
+ *     name="Media",
+ *     description="Operaciones sobre archivos multimedia"
+ * )
+ */
 class MediaController extends Controller
 {
     /**
-     * Display a listing of the resource.
+     * @OA\Get(
+     *     path="/api/media",
+     *     summary="Mostrar lista de archivos multimedia",
+     *     tags={"Media"},
+     *     @OA\Response(
+     *         response=200,
+     *         description="Lista de archivos multimedia"
+     *     )
+     * )
      */
     public function index()
     {
@@ -21,7 +36,25 @@ class MediaController extends Controller
     }
 
     /**
-     * Store a newly created resource in storage.
+     * @OA\Post(
+     *     path="/api/media",
+     *     summary="Subir un nuevo archivo multimedia",
+     *     tags={"Media"},
+     *     @OA\RequestBody(
+     *         required=true,
+     *         @OA\MediaType(
+     *             mediaType="multipart/form-data",
+     *             @OA\Schema(
+     *                 @OA\Property(property="message_id", type="integer", example=1),
+     *                 @OA\Property(property="url", type="file", description="Archivo multimedia")
+     *             )
+     *         )
+     *     ),
+     *     @OA\Response(
+     *         response=201,
+     *         description="Archivo multimedia subido"
+     *     )
+     * )
      */
     public function store(Request $request)
     {
@@ -42,7 +75,21 @@ class MediaController extends Controller
     }
 
     /**
-     * Display the specified resource.
+     * @OA\Get(
+     *     path="/api/media/{id}",
+     *     summary="Mostrar un archivo multimedia específico",
+     *     tags={"Media"},
+     *     @OA\Parameter(
+     *         name="id",
+     *         in="path",
+     *         required=true,
+     *         @OA\Schema(type="integer")
+     *     ),
+     *     @OA\Response(
+     *         response=200,
+     *         description="Archivo multimedia específico"
+     *     )
+     * )
      */
     public function show(Media $media)
     {
@@ -50,7 +97,30 @@ class MediaController extends Controller
     }
 
     /**
-     * Update the specified resource in storage.
+     * @OA\Put(
+     *     path="/api/media/{id}",
+     *     summary="Actualizar un archivo multimedia",
+     *     tags={"Media"},
+     *     @OA\Parameter(
+     *         name="id",
+     *         in="path",
+     *         required=true,
+     *         @OA\Schema(type="integer")
+     *     ),
+     *     @OA\RequestBody(
+     *         required=true,
+     *         @OA\MediaType(
+     *             mediaType="multipart/form-data",
+     *             @OA\Schema(
+     *                 @OA\Property(property="url", type="file", description="Nuevo archivo multimedia")
+     *             )
+     *         )
+     *     ),
+     *     @OA\Response(
+     *         response=200,
+     *         description="Archivo multimedia actualizado"
+     *     )
+     * )
      */
     public function update(Request $request, Media $media)
     {
@@ -74,7 +144,21 @@ class MediaController extends Controller
     }
 
     /**
-     * Remove the specified resource from storage.
+     * @OA\Delete(
+     *     path="/api/media/{id}",
+     *     summary="Eliminar un archivo multimedia",
+     *     tags={"Media"},
+     *     @OA\Parameter(
+     *         name="id",
+     *         in="path",
+     *         required=true,
+     *         @OA\Schema(type="integer")
+     *     ),
+     *     @OA\Response(
+     *         response=200,
+     *         description="Archivo multimedia eliminado"
+     *     )
+     * )
      */
     public function destroy(Media $media)
     {
@@ -84,7 +168,4 @@ class MediaController extends Controller
         $media->delete();
         return response()->json('archivo eliminado');
     }
-
-
-
 }
