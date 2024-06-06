@@ -39,6 +39,3 @@ Route::post('/login', [AuthController::class, 'login']);
 Route::post('/register', [AuthController::class, 'register']);  // Opcional, si tienes registro de usuarios
 Route::post('/logout', [AuthController::class, 'logout'])->middleware('auth:sanctum');  // Opcional, si tienes logout
 
-// Rutas adicionales de autenticación
-Route::post('/forgot-password', [AuthController::class, 'forgotPassword']);  // Opcional, si tienes recuperación de contraseña
-Route::post('/reset-password', [AuthController::class, 'resetPassword']);    // Opcional, si tienes reinicio de contraseña

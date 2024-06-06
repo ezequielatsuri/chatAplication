@@ -32,7 +32,7 @@ const Register = () => {
       setPassword('');
       setConfirmPassword('');
       setTimeout(() => {
-        navigate('/login');
+      navigate('/login');
       }, 3000);
     })
     .catch(error => {
