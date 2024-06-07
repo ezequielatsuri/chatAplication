@@ -1,0 +1,23 @@
+# Ignorar archivos de imagen
+*.jpg
+*.jpeg
+*.png
+*.gif
+*.bmp
+*.tiff
+*.svg
+*.webp
+*.ico
+
+# Otros archivos y carpetas comunes para ignorar
+node_modules/
+dist/
+.DS_Store
+.env
+.vscode/
+.idea/
+*.log
+*.cache
+
+# No ignorar el archivo .gitignore
+!.gitignore
