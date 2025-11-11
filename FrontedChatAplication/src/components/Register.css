@@ -1,64 +1,105 @@
-.main2{
+/* Auth Page Layout */
+.auth-page {
+  min-height: 100vh;
   display: flex;
-  height: 100vh;
-  justify-content: center;
-  align-content: center;
-  align-items: center;
- 
-  background-color: #c8c8e2;
+  flex-direction: column;
+  background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+  padding-top: 70px; /* Space for fixed nav */
+  overflow-y: auto !important;
+  overflow-x: hidden !important;
+  height: auto !important;
 }
-.register-container {
-    width: 300px;
-    margin: 0 auto;
-    padding: 20px;
-    border: 1px solid #ccc;
-    border-radius: 10px;
-    background-color: #f9f9f9;
+
+/* Auth Container */
+.auth-container {
+  flex: 1;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  position: relative;
+  font-family: 'Inter', sans-serif;
+  padding: 3rem 1rem;
+  margin-bottom: 2rem; /* Add space before footer */
+  min-height: calc(100vh - 70px - 200px); /* Ensure content can extend */
+  overflow: visible !important;
+}
+
+/* Success Message */
+.success-message {
+  display: flex;
+  align-items: center;
+  gap: 0.75rem;
+  padding: 1rem;
+  background: rgba(52, 199, 89, 0.1);
+  border: 1px solid rgba(52, 199, 89, 0.3);
+  border-radius: 12px;
+  margin-bottom: 1.5rem;
+  color: #34c759;
+  font-size: 0.9rem;
+}
+
+.success-message i {
+  font-size: 1.1rem;
+}
+
+/* Register specific styles */
+.register-form .form-group:last-of-type {
+  margin-bottom: 1rem;
+}
+
+/* Password strength indicator */
+.password-strength {
+  margin-top: 0.5rem;
+  padding: 0.5rem;
+  border-radius: 8px;
+  font-size: 0.8rem;
+  text-align: center;
+}
+
+.password-strength.weak {
+  background: rgba(255, 59, 48, 0.1);
+  color: #ff3b30;
+  border: 1px solid rgba(255, 59, 48, 0.3);
+}
+
+.password-strength.medium {
+  background: rgba(255, 149, 0, 0.1);
+  color: #ff9500;
+  border: 1px solid rgba(255, 149, 0, 0.3);
+}
+
+.password-strength.strong {
+  background: rgba(52, 199, 89, 0.1);
+  color: #34c759;
+  border: 1px solid rgba(52, 199, 89, 0.3);
+}
+
+/* Terms and conditions link */
+.terms-link {
+  color: #00d4ff;
+  text-decoration: none;
+  font-weight: 500;
+  transition: color 0.3s ease;
+}
+
+.terms-link:hover {
+  color: #0099cc;
+  text-decoration: underline;
+}
+
+/* Responsive adjustments for register */
+@media (max-width: 768px) {
+  .register-form .form-group {
+    margin-bottom: 1rem;
   }
   
-  .register-container h2 {
-    text-align: center;
-    margin-bottom: 20px;
+  .form-options {
+    margin-bottom: 1.5rem;
   }
   
-  .form-group {
-    margin-bottom: 15px;
+  .checkbox-label {
+    font-size: 0.85rem;
+    line-height: 1.4;
   }
-  
-  .form-group label {
-    display: block;
-    margin-bottom: 5px;
-  }
-  
-  .form-group input {
-    width: 100%;
-    padding: 8px;
-    box-sizing: border-box;
-    border: 1px solid #ccc;
-    border-radius: 5px;
-  }
-  
-  #boton1{
-    width: 100%;
-    padding: 10px;
-    background-color: #007bff;
-    color: white;
-    border: none;
-    border-radius: 5px;
-    cursor: pointer;
-  }
-  
-  button:hover {
-    background-color: #0056b3;
-  }
-  
-  .error {
-    color: red;
-    text-align: center;
-  }
-  
-  .success {
-    color: green;
-    text-align: center;
-  }
+}
   

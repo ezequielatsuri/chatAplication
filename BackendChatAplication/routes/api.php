@@ -29,6 +29,7 @@ Route::middleware('auth:sanctum')->group(function(){
     Route::apiResource('/media', MediaController::class)->names('media');
     Route::get('messages/between/{userId1}/{userId2}', [MessageController::class, 'getMessagesBetweenUsers']);
     Route::get('/contacts/senders-from-messages/{userId}', [MessageController::class, 'getSenders']);
+    Route::post('/messages/test-upload', [MessageController::class, 'testUpload']);
 });
 
 

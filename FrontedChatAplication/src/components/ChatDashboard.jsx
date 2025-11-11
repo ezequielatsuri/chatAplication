@@ -4,12 +4,16 @@ import { useNavigate } from 'react-router-dom';
 import ConversationList from './ConversationList';
 import ChatWindow from './ChatWindow';
 import MessageInput from './MessageInput';
+import Navbar from './Navbar';
 import './ChatDashboard.css';
 
 const ChatDashboard = () => {
   const [currentUser, setCurrentUser] = useState(null);
   const [selectedConversation, setSelectedConversation] = useState(null);
   const [messages, setMessages] = useState([]);
+  const [notificationCount, setNotificationCount] = useState(0);
+  const [recentNotifications, setRecentNotifications] = useState([]);
+  const [unreadMessages, setUnreadMessages] = useState([]);
   const navigate = useNavigate();
 
   useEffect(() => {
@@ -64,44 +68,77 @@ const ChatDashboard = () => {
     }
   }, [selectedConversation, currentUser]);
 
+  const handleClearNotifications = () => setNotificationCount(0);
+
   const handleSelectConversation = (conversation) => {
     setSelectedConversation(conversation);
+    setNotificationCount(0); // Limpiar notificaciones al abrir conversación
+    // Marcar mensajes como leídos al abrir la conversación
+    setUnreadMessages(prev => prev.filter(msg => msg.sender_id !== conversation.user_id));
     console.log('Conversación seleccionada en handleSelectConversation:', conversation);
   };
 
   const handleNewMessage = (message) => {
+    console.log('ChatDashboard - handleNewMessage llamado con:', message);
+    console.log('ChatDashboard - message.sender_id:', message.sender_id, 'currentUser.id:', currentUser.id);
     setMessages(prevMessages => [...prevMessages, message]);
+  };
+
+  const handleLogout = () => {
+    setCurrentUser(null);
+    setSelectedConversation(null);
+    setMessages([]);
   };
 
   if (!currentUser) {
     return (
-      <div>
-        <p>Loading...</p>
-        <p>Verificando autenticación del usuario...</p>
+      <div className="loading-container">
+        <div className="loading-spinner">
+          <div className="spinner"></div>
+          <p>Verificando autenticación...</p>
+        </div>
       </div>
     );
   }
 
   return (
-    <div className="chat-dashboard">
-      <div className="sidebar">
+    <div className="app-container chat-page">
+      <Navbar currentUser={currentUser} onLogout={handleLogout} notificationCount={notificationCount} onClearNotifications={handleClearNotifications} recentNotifications={unreadMessages} />
+      
+      <main className="main-content">
+        <div className="chat-dashboard">
+                <div className="sidebar">
         <ConversationList 
           selectConversation={handleSelectConversation} 
-          currentUser={currentUser} 
+          currentUser={currentUser}
+          selectedConversation={selectedConversation}
         />
       </div>
-      <div className="main">
-        <ChatWindow 
-          conversation={selectedConversation} 
-          currentUser={currentUser} 
-          messages={messages} 
-        />
-        <MessageInput 
-          conversation={selectedConversation} 
-          currentUser={currentUser} 
-          onNewMessage={handleNewMessage} 
-        />
-      </div>
+          <div className="main">
+            <ChatWindow 
+              conversation={selectedConversation} 
+              currentUser={currentUser} 
+              messages={messages} 
+              onNewNotification={(msg) => {
+                console.log('Mensaje recibido para notificación:', msg);
+                console.log('Sender ID:', msg.sender_id, 'Current User ID:', currentUser.id);
+                if (msg.sender_id !== currentUser.id) {
+                  console.log('Agregando a notificaciones - mensaje de otro usuario');
+                  setNotificationCount(c => c + 1);
+                  setUnreadMessages(prev => [msg, ...prev]);
+                } else {
+                  console.log('No agregando a notificaciones - mensaje propio');
+                }
+              }}
+            />
+            <MessageInput 
+              conversation={selectedConversation} 
+              currentUser={currentUser} 
+              onNewMessage={handleNewMessage} 
+            />
+          </div>
+        </div>
+      </main>
     </div>
   );
 };

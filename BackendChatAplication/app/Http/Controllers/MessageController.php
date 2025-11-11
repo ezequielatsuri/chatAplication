@@ -61,36 +61,137 @@ class MessageController extends Controller
         $request->validate([
             'sender_id' => 'required|exists:users,id',
             'receiver_id' => 'required|exists:users,id',
-            'content' => 'required|string',
-            'images.*' => 'image|mimes:jpeg,png,jpg,gif,mp4,svg|max:2048', // Validación para las imágenes
+            'content' => 'nullable|string',
+            'images.*' => 'nullable|file|mimes:jpeg,png,jpg,gif,svg,pdf,doc,docx,txt|max:5120', // 5MB máximo
         ]);
 
-        $message = Message::create([
-            'sender_id' => $request->input('sender_id'),
-            'receiver_id' => $request->input('receiver_id'),
-            'content' => $request->input('content'),
-            'sent_at' => now()
-        ]);
+        try {
+            $message = Message::create([
+                'sender_id' => $request->input('sender_id'),
+                'receiver_id' => $request->input('receiver_id'),
+                'content' => $request->input('content') ?: '', // Si content está vacío, usar string vacío
+                'sent_at' => now()
+            ]);
 
-        if ($request->hasFile('images')) {
-            $files = $request->file('images');
+            if ($request->hasFile('images')) {
+                $files = $request->file('images');
 
-            if (is_array($files) && count($files) > 0) {
-                foreach ($files as $file) {
-                    $filename = time() . '_' . $file->getClientOriginalName();
-                    Storage::disk('public')->putFileAs('images', $file, $filename);
-                    $message->media()->create([
-                        'url' => 'images/' . $filename,
-                        'type' => $file->getClientMimeType(),
-                    ]);
+                if (is_array($files) && count($files) > 0) {
+                    foreach ($files as $file) {
+                        if ($file && $file->isValid()) {
+                            $filename = time() . '_' . $file->getClientOriginalName();
+                            
+                            // Asegurar que el directorio existe
+                            $directory = 'images';
+                            if (!Storage::disk('public')->exists($directory)) {
+                                Storage::disk('public')->makeDirectory($directory);
+                            }
+                            
+                            // Guardar el archivo
+                            $path = Storage::disk('public')->putFileAs($directory, $file, $filename);
+                            
+                            if ($path) {
+                                $message->media()->create([
+                                    'url' => $path,
+                                    'type' => $file->getClientMimeType(),
+                                ]);
+                            }
+                        }
+                    }
                 }
             }
+
+            // Recargar el mensaje con las relaciones para incluir las imágenes
+            $message->load('media');
+
+            return response()->json($message, 201);
+        } catch (\Exception $e) {
+            \Log::error('Error creating message: ' . $e->getMessage());
+            return response()->json([
+                'message' => 'Error al crear el mensaje',
+                'error' => $e->getMessage()
+            ], 500);
         }
+    }
 
-        // Recargar el mensaje con las relaciones para incluir las imágenes
-        $message->load('media');
+    /**
+     * @OA\Post(
+     *     path="/api/messages/test-upload",
+     *     summary="Probar subida de archivos",
+     *     tags={"Mensajes"},
+     *     @OA\RequestBody(
+     *         required=true,
+     *         @OA\MediaType(
+     *             mediaType="multipart/form-data",
+     *             @OA\Schema(
+     *                 @OA\Property(property="test_file", type="file", description="Archivo de prueba")
+     *             )
+     *         )
+     *     ),
+     *     @OA\Response(
+     *         response=200,
+     *         description="Archivo subido correctamente"
+     *     )
+     * )
+     */
+    public function testUpload(Request $request)
+    {
+        try {
+            $request->validate([
+                'test_file' => 'required|file|mimes:jpeg,png,jpg,gif,svg,pdf,doc,docx,txt|max:5120',
+            ]);
 
-        return response()->json($message, 201);
+            if ($request->hasFile('test_file')) {
+                $file = $request->file('test_file');
+                
+                if ($file && $file->isValid()) {
+                    $filename = 'test_' . time() . '_' . $file->getClientOriginalName();
+                    
+                    // Asegurar que el directorio existe
+                    $directory = 'images';
+                    if (!Storage::disk('public')->exists($directory)) {
+                        Storage::disk('public')->makeDirectory($directory);
+                    }
+                    
+                    // Guardar el archivo
+                    $path = Storage::disk('public')->putFileAs($directory, $file, $filename);
+                    
+                    if ($path) {
+                        return response()->json([
+                            'success' => true,
+                            'message' => 'Archivo subido correctamente',
+                            'filename' => $filename,
+                            'path' => $path,
+                            'size' => $file->getSize(),
+                            'mime_type' => $file->getClientMimeType(),
+                            'url' => url('storage/' . $path)
+                        ], 200);
+                    } else {
+                        return response()->json([
+                            'success' => false,
+                            'message' => 'Error al guardar el archivo'
+                        ], 500);
+                    }
+                } else {
+                    return response()->json([
+                        'success' => false,
+                        'message' => 'Archivo inválido'
+                    ], 400);
+                }
+            } else {
+                return response()->json([
+                    'success' => false,
+                    'message' => 'No se recibió ningún archivo'
+                ], 400);
+            }
+        } catch (\Exception $e) {
+            \Log::error('Error in test upload: ' . $e->getMessage());
+            return response()->json([
+                'success' => false,
+                'message' => 'Error en la subida',
+                'error' => $e->getMessage()
+            ], 500);
+        }
     }
 
     /**
@@ -237,8 +338,30 @@ class MessageController extends Controller
                 return response()->json(['message' => 'No hay remitentes encontrados'], 404);
             }
 
-            $senders = User::whereIn('id', $senderIds)->get();
-            return response()->json($senders);
+            // Obtener usuarios existentes
+            $existingUsers = User::whereIn('id', $senderIds)->get();
+            
+            // Crear usuarios temporales para IDs que no existen
+            $missingIds = $senderIds->diff($existingUsers->pluck('id'));
+            $temporaryUsers = collect();
+            
+            foreach ($missingIds as $missingId) {
+                // Crear un usuario temporal con información básica
+                $temporaryUser = new User();
+                $temporaryUser->id = $missingId;
+                $temporaryUser->name = "Usuario #{$missingId}";
+                $temporaryUser->email = "usuario{$missingId}@temporal.com";
+                $temporaryUser->created_at = now();
+                $temporaryUser->updated_at = now();
+                $temporaryUser->is_temporary = true; // Marcar como temporal
+                
+                $temporaryUsers->push($temporaryUser);
+            }
+            
+            // Combinar usuarios existentes y temporales
+            $allSenders = $existingUsers->concat($temporaryUsers);
+            
+            return response()->json($allSenders);
         } catch (\Exception $e) {
             return response()->json(['message' => 'Error al obtener remitentes', 'error' => $e->getMessage()], 500);
         }

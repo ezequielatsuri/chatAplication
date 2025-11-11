@@ -1,92 +1,176 @@
 import React, { useState } from 'react';
 import './Login.css';
-import logo from './logo_login.png';
 import axios from 'axios';
-import { useNavigate } from 'react-router-dom';
+import { useNavigate, Link } from 'react-router-dom';
+import AuthNav from './AuthNav';
+import Footer from './Footer';
 
 const Login = () => {
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
-  const navigate = useNavigate();  // Llama a la función useNavigate
+  const [isLoading, setIsLoading] = useState(false);
+  const [error, setError] = useState('');
+  const [showPassword, setShowPassword] = useState(false);
+  const navigate = useNavigate();
 
-  const enviar = (event) => {
+  const handleSubmit = async (event) => {
     event.preventDefault();
-    axios.post('/login', { email, password })  // Asegúrate de que esta URL es correcta y está configurada en tu backend
-      .then(response => {
-        console.log('Login successful', response);
-        const token = response.data.token; // Asegúrate de que esto coincida con la estructura de tu respuesta
-        localStorage.setItem('token', token);
-        navigate('/chat');  // Redirige al usuario a /dashboard
-      })
-      .catch(error => {
-        console.error('There was an error logging in!', error);
-      });
-  };
+    setError('');
+    setIsLoading(true);
 
-  const redirectToRegister = () => {
-    navigate('/register');  // Redirige al usuario a /register
+    try {
+      const response = await axios.post('/login', { email, password });
+      console.log('Login successful', response);
+      const token = response.data.token;
+      localStorage.setItem('token', token);
+      navigate('/chat');
+    } catch (error) {
+      console.error('There was an error logging in!', error);
+      setError('Credenciales incorrectas. Inténtalo de nuevo.');
+    } finally {
+      setIsLoading(false);
+    }
   };
 
   return (
-    <div className="main1">
-      <div className="container">
-        <div className="left">
-          <div className="circle-container">
-            <div className="circleMini green"></div>
-            <div className="circleMini pink"></div>
-            <div className="circle blue-circle"></div>
-            <div className="circle pink-circle"></div>
-            <div className="circle green-circle"></div>
+    <div className="auth-page">
+      <AuthNav />
+      
+      <div className="auth-container">
+        {/* Background Animation */}
+        <div className="background-animation">
+          <div className="floating-shapes">
+            <div className="shape shape-1"></div>
+            <div className="shape shape-2"></div>
+            <div className="shape shape-3"></div>
+            <div className="shape shape-4"></div>
+            <div className="shape shape-5"></div>
           </div>
-          
-          <nav>
-            <div className="navbar-top">
-              <img src={logo} alt="logo" className="logo" />
-            </div>
-            <div className="navbar-button">
-              <ul>
-                <li><a href="">About</a></li>
-                <li><a href="">Privacy</a></li>
-                <li><a href="">Terms of use</a></li>
-                <li><a href="">FAQ</a></li>
-              </ul> 
-            </div>
-          </nav>
         </div>
-        <div className="right">
-          <div className="login-container">
-            <h2>Log in</h2>
-            <form onSubmit={enviar}>
-              <input 
-                type="text" 
-                name="email" 
-                value={email} 
-                placeholder="Email" 
-                required 
-                onChange={(e) => setEmail(e.target.value)} 
-              />
-              <input 
-                type="password" 
-                name="password" 
-                value={password} 
-                placeholder="Password" 
-                required 
-                onChange={(e) => setPassword(e.target.value)}
-              />
-              <label className="check_text">
-                <input type="checkbox" name="keep_logged" value="1" /> Keep me logged in
-              </label>
-              <input type="submit" value="Log in" />
-              <div className="registro">
-                <p>¿No tienes una cuenta?</p>
-                <a href="#" onClick={redirectToRegister}>Registrate</a>
+
+        {/* Main Content */}
+        <div className="auth-content">
+          {/* Left Side - Brand */}
+          <div className="auth-brand">
+            <div className="brand-content">
+              <div className="brand-logo">
+                <i className="fas fa-comments"></i>
+                <h1>SkeepChat</h1>
               </div>
-            </form>
+              <div className="brand-description">
+                <h2>Conecta con el mundo</h2>
+                <p>Donde las palabras cobran vida y las distancias se desvanecen. Una experiencia que transforma cada conversación en un momento inolvidable.</p>
+              </div>
+              <div className="brand-features">
+                <div className="feature">
+                  <i className="fas fa-shield-alt"></i>
+                  <span>Mensajes seguros</span>
+                </div>
+                <div className="feature">
+                  <i className="fas fa-bolt"></i>
+                  <span>Comunicación instantánea</span>
+                </div>
+                <div className="feature">
+                  <i className="fas fa-mobile-alt"></i>
+                  <span>Multiplataforma</span>
+                </div>
+              </div>
+            </div>
+          </div>
+
+          {/* Right Side - Login Form */}
+          <div className="auth-form-container">
+            <div className="auth-form">
+              <div className="form-header">
+                <h2>Bienvenido de vuelta</h2>
+                <p>Inicia sesión para continuar</p>
+              </div>
+
+              {error && (
+                <div className="error-message">
+                  <i className="fas fa-exclamation-circle"></i>
+                  <span>{error}</span>
+                </div>
+              )}
+
+              <form onSubmit={handleSubmit} className="login-form">
+                <div className="form-group">
+                  <div className="input-wrapper">
+                    <i className="fas fa-envelope input-icon"></i>
+                    <input
+                      type="email"
+                      value={email}
+                      onChange={(e) => setEmail(e.target.value)}
+                      placeholder="Correo electrónico"
+                      required
+                      className="form-input"
+                    />
+                  </div>
+                </div>
+
+                <div className="form-group">
+                  <div className="input-wrapper">
+                    <i className="fas fa-lock input-icon"></i>
+                    <input
+                      type={showPassword ? "text" : "password"}
+                      value={password}
+                      onChange={(e) => setPassword(e.target.value)}
+                      placeholder="Contraseña"
+                      required
+                      className="form-input"
+                    />
+                    <button
+                      type="button"
+                      className="password-toggle"
+                      onClick={() => setShowPassword(!showPassword)}
+                    >
+                      <i className={`fas ${showPassword ? 'fa-eye-slash' : 'fa-eye'}`}></i>
+                    </button>
+                  </div>
+                </div>
+
+                <div className="form-options">
+                  <label className="checkbox-wrapper">
+                    <input type="checkbox" className="checkbox-input" />
+                    <span className="checkbox-custom"></span>
+                    <span className="checkbox-label">Mantener sesión iniciada</span>
+                  </label>
+                  <a href="#" className="forgot-password">¿Olvidaste tu contraseña?</a>
+                </div>
+
+                <button
+                  type="submit"
+                  disabled={isLoading}
+                  className="submit-btn"
+                >
+                  {isLoading ? (
+                    <>
+                      <i className="fas fa-spinner fa-spin"></i>
+                      <span>Iniciando sesión...</span>
+                    </>
+                  ) : (
+                    <>
+                      <i className="fas fa-sign-in-alt"></i>
+                      <span>Iniciar sesión</span>
+                    </>
+                  )}
+                </button>
+              </form>
+
+              <div className="auth-footer">
+                <p>¿No tienes una cuenta?</p>
+                <Link to="/register" className="auth-link">
+                  Regístrate aquí
+                </Link>
+              </div>
+            </div>
           </div>
         </div>
       </div>
+      
+      <Footer />
     </div>
   );
-}
+};
 
 export default Login;

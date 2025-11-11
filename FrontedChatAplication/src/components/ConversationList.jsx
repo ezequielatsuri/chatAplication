@@ -1,12 +1,15 @@
 import React, { useState, useEffect } from 'react';
 import axios from 'axios';
-import { useNavigate } from 'react-router-dom';
 import './ConversationList.css';
 
-const ConversationList = ({ selectConversation, currentUser }) => {
+const ConversationList = ({ selectConversation, currentUser, selectedConversation }) => {
   const [conversations, setConversations] = useState([]);
   const [newContact, setNewContact] = useState('');
-  const navigate = useNavigate();
+  const [loading, setLoading] = useState(false);
+  const [searchTerm, setSearchTerm] = useState('');
+  const [addingContact, setAddingContact] = useState(false);
+  const [error, setError] = useState('');
+  const [showAddContact, setShowAddContact] = useState(false);
 
   useEffect(() => {
     if (currentUser) {
@@ -16,6 +19,8 @@ const ConversationList = ({ selectConversation, currentUser }) => {
   }, [currentUser]);
 
   const getContacts = () => {
+    setLoading(true);
+    setError('');
     axios.get('/contacts', {
       headers: {
         'Authorization': `Bearer ${localStorage.getItem('token')}`
@@ -27,6 +32,10 @@ const ConversationList = ({ selectConversation, currentUser }) => {
       })
       .catch((err) => {
         console.error('Error fetching contacts:', err);
+        setError('Error al cargar contactos');
+      })
+      .finally(() => {
+        setLoading(false);
       });
   };
 
@@ -47,7 +56,8 @@ const ConversationList = ({ selectConversation, currentUser }) => {
           user_id: contact.id,
           name: contact.name,
           email: contact.email,
-          fromMessages: true
+          fromMessages: true,
+          is_temporary: contact.is_temporary || false
         }));
 
         setConversations(prevConversations => {
@@ -67,33 +77,65 @@ const ConversationList = ({ selectConversation, currentUser }) => {
       });
   };
 
-  const handleAddContact = (e) => {
+  const handleAddContact = async (e) => {
     e.preventDefault();
-    if (newContact.trim()) {
-      axios.post('/contacts', { email: newContact }, {
-        headers: {
-          'Authorization': `Bearer ${localStorage.getItem('token')}`
-        }
-      })
-        .then(response => {
-          const newContactData = {
-            id: response.data.id,
-            user_id: response.data.user_id,
-            name: response.data.name,
-            email: response.data.email,
-            fromMessages: false
-          };
-          if (!isDuplicate(newContactData, conversations)) {
-            setConversations(prevConversations => [
-              ...prevConversations,
-              newContactData
-            ]);
+    if (newContact.trim() && !addingContact) {
+      setAddingContact(true);
+      setError('');
+      
+      try {
+        const response = await axios.post('/contacts', { email: newContact }, {
+          headers: {
+            'Authorization': `Bearer ${localStorage.getItem('token')}`
           }
-          setNewContact('');
-        })
-        .catch(error => {
-          console.error('Error adding contact:', error);
         });
+        
+        const newContactData = {
+          id: response.data.id,
+          user_id: response.data.user_id,
+          name: response.data.name,
+          email: response.data.email,
+          fromMessages: false
+        };
+        
+        if (!isDuplicate(newContactData, conversations)) {
+          setConversations(prevConversations => [
+            newContactData,
+            ...prevConversations
+          ]);
+        }
+        
+        setNewContact('');
+        setShowAddContact(false);
+        
+        // Feedback visual de éxito
+        const input = e.target.querySelector('.contact-input');
+        if (input) {
+          input.style.borderColor = '#00d4ff';
+          input.style.boxShadow = '0 0 0 4px rgba(0, 212, 255, 0.2)';
+          setTimeout(() => {
+            input.style.borderColor = '';
+            input.style.boxShadow = '';
+          }, 2000);
+        }
+        
+      } catch (error) {
+        console.error('Error adding contact:', error);
+        setError('Error al agregar contacto. Verifica que el email sea válido.');
+        
+        // Feedback visual de error
+        const input = e.target.querySelector('.contact-input');
+        if (input) {
+          input.style.borderColor = '#ff3b30';
+          input.style.boxShadow = '0 0 0 4px rgba(255, 59, 48, 0.2)';
+          setTimeout(() => {
+            input.style.borderColor = '';
+            input.style.boxShadow = '';
+          }, 3000);
+        }
+      } finally {
+        setAddingContact(false);
+      }
     }
   };
 
@@ -104,56 +146,194 @@ const ConversationList = ({ selectConversation, currentUser }) => {
     }
   };
 
-  const handleLogout = () => {
-    axios.post('/logout', {}, {
-      headers: {
-        'Authorization': `Bearer ${localStorage.getItem('token')}`
-      }
-    })
-      .then(() => {
-        localStorage.removeItem('token');
-        navigate('/login');
-      })
-      .catch((err) => {
-        console.error('Error during logout:', err);
-      });
+  const handleSearchChange = (e) => {
+    setSearchTerm(e.target.value);
+    setError(''); // Limpiar errores al buscar
+  };
+
+  const filteredConversations = conversations.filter(conversation =>
+    conversation.name.toLowerCase().includes(searchTerm.toLowerCase()) ||
+    conversation.email.toLowerCase().includes(searchTerm.toLowerCase())
+  );
+
+  const getInitials = (name) => {
+    return name
+      .split(' ')
+      .map(word => word.charAt(0))
+      .join('')
+      .toUpperCase()
+      .slice(0, 2);
+  };
+
+  const clearSearch = () => {
+    setSearchTerm('');
+  };
+
+  const toggleAddContact = () => {
+    setShowAddContact(!showAddContact);
+    setNewContact('');
+    setError('');
   };
 
   return (
     <div className="conversation-list-container">
-      <div className="profile-container">
-        <div className="profile-info">
-          {currentUser ? (
-            <>
-              <p><strong>Name:</strong> {currentUser.name}</p>
-              <p><strong>Email:</strong> {currentUser.email}</p>
-            </>
-          ) : (
-            <p>Loading profile...</p>
-          )}
+      {/* Header */}
+      <div className="conversation-header">
+        <h3>Conversaciones</h3>
+        <div className="conversation-count">
+          {conversations.length} contactos
         </div>
-        <button onClick={handleLogout} className="logout-button">Logout</button>
       </div>
-      <form onSubmit={handleAddContact} className="add-contact-form">
-        <input
-          type="text"
-          value={newContact}
-          onChange={(e) => setNewContact(e.target.value)}
-          placeholder="Add new contact (email)"
-        />
-        <button type="submit">Add</button>
-      </form>
-      <div className="conversation-list">
-        {conversations.map(conversation => (
-          <div
-            key={conversation.id}
-            onClick={() => handleSelectConversation(conversation)}
-            className={`conversation-item ${conversation.fromMessages ? 'from-messages' : ''}`}
+
+      {/* Search and Add Contact */}
+      <div className="search-container">
+        <div className="search-input-wrapper">
+          <i className="fas fa-search search-icon"></i>
+          <input
+            type="text"
+            value={searchTerm}
+            onChange={handleSearchChange}
+            placeholder="Buscar contactos..."
+            className="search-input"
+          />
+          {searchTerm && (
+            <button
+              type="button"
+              onClick={clearSearch}
+              className="clear-search-btn"
+              title="Limpiar búsqueda"
+            >
+              <i className="fas fa-times"></i>
+            </button>
+          )}
+          <button
+            type="button"
+            onClick={toggleAddContact}
+            className="add-contact-btn-search"
+            title="Agregar contacto"
           >
-            <p><strong>Name:</strong> {conversation.name}</p>
-            <p><strong>Email:</strong> {conversation.email}</p>
+            <i className="fas fa-plus"></i>
+          </button>
+        </div>
+        
+        {/* Add Contact Form (conditional) */}
+        {showAddContact && (
+          <form onSubmit={handleAddContact} className="add-contact-form-inline">
+            <div className="input-group">
+              <input
+                type="email"
+                value={newContact}
+                onChange={(e) => setNewContact(e.target.value)}
+                placeholder="Email del contacto..."
+                className="contact-input"
+                disabled={addingContact}
+                required
+                autoFocus
+              />
+              <button 
+                type="submit" 
+                className="add-contact-btn-inline" 
+                disabled={addingContact || !newContact.trim()}
+                title={!newContact.trim() ? "Ingresa un email" : "Agregar contacto"}
+              >
+                {addingContact ? (
+                  <i className="fas fa-spinner fa-spin"></i>
+                ) : (
+                  <i className="fas fa-check"></i>
+                )}
+              </button>
+              <button
+                type="button"
+                onClick={toggleAddContact}
+                className="cancel-add-btn"
+                title="Cancelar"
+              >
+                <i className="fas fa-times"></i>
+              </button>
+            </div>
+            {error && (
+              <div className="error-message">
+                <i className="fas fa-exclamation-circle"></i>
+                {error}
+              </div>
+            )}
+          </form>
+        )}
+      </div>
+
+      {/* Conversations List */}
+      <div className="conversation-list">
+        {loading && conversations.length === 0 ? (
+          <div className="loading-conversations">
+            <div className="spinner"></div>
+            <h4>Cargando contactos...</h4>
+            <p>Obteniendo tu lista de contactos</p>
           </div>
-        ))}
+        ) : filteredConversations.length === 0 ? (
+          <div className="empty-conversations">
+            <div className="empty-icon">
+              <i className="fas fa-users"></i>
+            </div>
+            <h4>
+              {searchTerm ? 'No se encontraron contactos' : 'No hay contactos'}
+            </h4>
+            <p>
+              {searchTerm 
+                ? 'Intenta con otro término de búsqueda' 
+                : 'Agrega un contacto para comenzar a chatear'
+              }
+            </p>
+            {searchTerm && (
+              <button 
+                onClick={clearSearch}
+                className="clear-search-link"
+              >
+                Limpiar búsqueda
+              </button>
+            )}
+          </div>
+        ) : (
+          filteredConversations.map(conversation => (
+            <div
+              key={conversation.id}
+              onClick={() => handleSelectConversation(conversation)}
+              className={`conversation-item ${
+                selectedConversation?.id === conversation.id ? 'selected' : ''
+              } ${conversation.fromMessages ? 'from-messages' : ''}`}
+              title={`Chatear con ${conversation.name}`}
+            >
+              <div className="conversation-avatar">
+                <span>{getInitials(conversation.name)}</span>
+              </div>
+              <div className="conversation-info">
+                <div className="conversation-name">
+                  {conversation.name}
+                  {conversation.fromMessages && (
+                    <span className="message-indicator" title="Contacto de mensajes">
+                      <i className="fas fa-comment"></i>
+                    </span>
+                  )}
+                  {conversation.is_temporary && (
+                    <span className="temporary-indicator" title="Usuario no registrado">
+                      <i className="fas fa-user-clock"></i>
+                    </span>
+                  )}
+                </div>
+                <div className="conversation-email">
+                  {conversation.email}
+                  {conversation.is_temporary && (
+                    <span className="temporary-badge" title="Usuario temporal">
+                      Temporal
+                    </span>
+                  )}
+                </div>
+              </div>
+              <div className="conversation-status">
+                <div className="status-dot online" title="En línea"></div>
+              </div>
+            </div>
+          ))
+        )}
       </div>
     </div>
   );
